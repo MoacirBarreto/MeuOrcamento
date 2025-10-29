@@ -5,59 +5,97 @@ import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import devandroid.moacir.meuorcamento.data.model.Natureza
+import devandroid.moacir.meuorcamento.ui.adapter.LancamentoAdapter
 import devandroid.moacir.meuorcamento.ui.viewmodel.MainViewModel
 import devandroid.moacir.meuorcamento.ui.viewmodel.ViewModelFactory
 import kotlinx.coroutines.launch
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import devandroid.moacir.meuorcamento.ui.dialog.AddLancamentoBottomSheet
 
 class MainActivity : AppCompatActivity() {
 
-    // 1. Obter a instância do ViewModel
-    // Usa a property delegate 'viewModels' do KTX para obter o ViewModel.
-    // Fornecemos nossa ViewModelFactory para que o sistema saiba como criar o MainViewModel.
+    // 1. Obter a instância do ViewModel (como antes)
     private val mainViewModel: MainViewModel by viewModels {
-        // Acessa o repositório criado na classe Application
         ViewModelFactory((application as MeuOrcamentoApplication).repository)
     }
 
+    // 2. Declarar o Adapter que criamos
+    private lateinit var lancamentoAdapter: LancamentoAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // O setContentView será ajustado depois para usar seu layout XML
         setContentView(R.layout.activity_main)
+        val fab: FloatingActionButton = findViewById(R.id.fabAdicionarLancamento)
+        fab.setOnClickListener {
+            // Cria uma instância do nosso BottomSheet e o exibe
+            val bottomSheet = AddLancamentoBottomSheet(mainViewModel)
+            bottomSheet.show(supportFragmentManager, "AddLancamentoBottomSheet")
+        }
 
-        Log.d("MainActivity", "ViewModel inicializado: $mainViewModel")
+        setupRecyclerView()
+        observeLancamentos()
+        adicionarDadosDeTesteSeNecessario()
 
-        // 2. Observar os dados do ViewModel
+
+    }
+
+    private fun setupRecyclerView() {
+        // Encontra o RecyclerView no layout
+        val recyclerView: RecyclerView = findViewById(R.id.recyclerViewLancamentos)
+
+        // Instancia o nosso adapter
+        lancamentoAdapter = LancamentoAdapter()
+
+        // Define o adapter e o layout manager para o RecyclerView
+        recyclerView.adapter = lancamentoAdapter
+        recyclerView.layoutManager = LinearLayoutManager(this)
+    }
+
+    private fun observeLancamentos() {
         // Lança uma coroutine que respeita o ciclo de vida da Activity
         lifecycleScope.launch {
             // 'collect' fica escutando as emissões do StateFlow
             mainViewModel.todosLancamentos.collect { lancamentos ->
-                // Este bloco será executado sempre que a lista de lançamentos mudar.
-                if (lancamentos.isNotEmpty()) {
-                    Log.d("MainActivity", "Lista de lançamentos atualizada: $lancamentos")
-                } else {
-                    Log.d("MainActivity", "Ainda não há lançamentos no banco de dados.")
-                }
+                // Quando uma nova lista de lançamentos chegar, submeta-a ao adapter.
+                // O ListAdapter cuidará de calcular as diferenças e animar a lista.
+                lancamentoAdapter.submitList(lancamentos)
+                Log.d("MainActivity", "Adapter atualizado com ${lancamentos.size} itens.")
             }
         }
-
-        // 3. (OPCIONAL) Adicionar dados de teste para verificar se tudo funciona
-        // Vamos adicionar uma categoria e um lançamento de teste na primeira vez que o app abrir.
-        adicionarDadosDeTeste()
     }
 
-    private fun adicionarDadosDeTeste() {
-        // Adiciona uma categoria "Salário"
-        mainViewModel.adicionarCategoria("Salário")
+    // Código para popular o banco com dados de exemplo.
+    // Alterado para adicionar dados apenas se a lista estiver vazia.
+    private fun adicionarDadosDeTesteSeNecessario() {
+        lifecycleScope.launch {
+            mainViewModel.todosLancamentos.collect { lancamentos ->
+                if (lancamentos.isEmpty()) {
+                    Log.d("MainActivity", "Banco de dados vazio. Adicionando dados de teste.")
+                    // Adiciona uma categoria "Salário"
+                    mainViewModel.adicionarCategoria("Salário")
+                    mainViewModel.adicionarCategoria("Alimentação")
 
-        // Adiciona um lançamento de teste
-        // A lógica para obter o ID da categoria será mais robusta no futuro.
-        // Por enquanto, vamos assumir que a primeira categoria tem id = 1.
-        mainViewModel.adicionarLancamento(
-            descricao = "Salário do mês",
-            valor = java.math.BigDecimal("3000.00"),
-            categoriaId = 1, // Assumindo que o ID da categoria "Salário" será 1
-            natureza = devandroid.moacir.meuorcamento.data.model.Natureza.RECEITA
-        )
-        Log.d("MainActivity", "Dados de teste adicionados.")
+                    // Adiciona um lançamento de teste
+                    mainViewModel.adicionarLancamento(
+                        descricao = "Salário de Outubro",
+                        valor = 3000.0.toBigDecimal(),
+                        categoriaId = 1, // Assumindo que o ID da categoria "Salário" será 1
+                        natureza = Natureza.RECEITA
+                    )
+
+                    mainViewModel.adicionarLancamento(
+                        descricao = "Compras no mercado",
+                        valor = 250.55.toBigDecimal(),
+                        categoriaId = 2, // Assumindo que o ID da categoria "Alimentação" será 2
+                        natureza = Natureza.DESPESA
+                    )
+                }
+                // Usamos 'return@collect' implicitamente para parar de coletar após a verificação,
+                // mas a coroutine principal (observeLancamentos) continuará funcionando.
+            }
+        }
     }
 }

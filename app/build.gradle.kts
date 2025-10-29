@@ -1,8 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.google.devtools.ksp) // MANTÉM O KSP
-    // id("org.jetbrains.kotlin.kapt") // REMOVIDO
+    alias(libs.plugins.google.devtools.ksp)
+
 }
 
 configurations.all {
