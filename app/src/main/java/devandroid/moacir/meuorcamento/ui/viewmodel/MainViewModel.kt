@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
-import java.util.Date
 
 class MainViewModel(private val repository: MeuOrcamentoRepository) : ViewModel() {
 
@@ -32,24 +31,30 @@ class MainViewModel(private val repository: MeuOrcamentoRepository) : ViewModel(
             initialValue = emptyList()
         )
 
+
     /**
      * Função para adicionar um novo lançamento.
      * Ela é chamada a partir da UI (ex: clique de um botão).
      */
-    fun adicionarLancamento(descricao: String, valor: BigDecimal, categoriaId: Long, natureza: Natureza) {
-        // Usa o viewModelScope para lançar uma coroutine.
-        // As operações de I/O (inserir no banco) devem ser feitas fora da thread principal.
+    fun adicionarLancamento(
+        descricao: String,
+        valor: BigDecimal,
+        categoriaId: Int,
+        natureza: Natureza,
+        data: Long = System.currentTimeMillis() // Novo parâmetro com valor padrão
+    ) {
         viewModelScope.launch {
             val novoLancamento = Lancamento(
-                descricaoLancamento  = descricao,
                 valor = valor,
-                dataHora = Date().time,
-                categoriaId = categoriaId,
-                natureza = natureza
+                dataHora = data, // Usa o parâmetro de data
+                natureza = natureza,
+                descricaoLancamento = descricao,
+                categoriaId = categoriaId.toLong() // <<< CORREÇÃO APLICADA AQUI
             )
             repository.inserirLancamento(novoLancamento)
         }
     }
+
 
     /**
      * Função para adicionar uma nova categoria.
@@ -60,4 +65,32 @@ class MainViewModel(private val repository: MeuOrcamentoRepository) : ViewModel(
             repository.inserirCategoria(novaCategoria)
         }
     }
+
+    // NOVO: Função para atualizar uma categoria
+    fun atualizarCategoria(categoria: Categoria) {
+        viewModelScope.launch {
+            repository.updateCategoria(categoria)
+        }
+    }
+
+    // NOVO: Função para deletar uma categoria
+    fun deletarCategoria(categoria: Categoria) {
+        viewModelScope.launch {
+            repository.deletarCategoria(categoria)
+        }
+    }
+
+
+    fun deletarLancamento(lancamento: Lancamento) {
+        viewModelScope.launch {
+            repository.deletarLancamento(lancamento)
+        }
+    }
+
+    fun atualizarLancamento(lancamento: Lancamento) {
+        viewModelScope.launch {
+            repository.updateLancamento(lancamento)
+        }
+    }
+
 }

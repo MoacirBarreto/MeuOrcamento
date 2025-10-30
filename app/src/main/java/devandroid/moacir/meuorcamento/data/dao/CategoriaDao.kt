@@ -1,32 +1,31 @@
 package devandroid.moacir.meuorcamento.data.dao
 
+// Em CategoriaDao.kt
+
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import devandroid.moacir.meuorcamento.data.model.Categoria
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CategoriaDao {
 
-    /**
-     * Insere uma nova categoria no banco de dados.
-     * Se uma categoria com o mesmo ID já existir, ela será substituída.
-     */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun inserir(categoria: Categoria)
 
-    /**
-     * Busca todas as categorias do banco de dados, ordenadas pelo nome.
-     * Retorna um Flow, que emite a lista automaticamente sempre que os dados mudam.
-     */
-    @Query("SELECT * FROM categorias ORDER BY nome ASC")
+    // GARANTIR QUE ESTA FUNÇÃO EXISTE E RETORNA UM FLOW
+    @Query("SELECT * FROM categorias ORDER BY nome")
     fun buscarTodas(): Flow<List<Categoria>>
 
-    /**
-     * Busca uma única categoria pelo seu ID.
-     */
-    @Query("SELECT * FROM categorias WHERE id = :categoriaId")
-    suspend fun buscarPorId(categoriaId: Long): Categoria?
+    // NOVO: Função para atualizar uma categoria
+    @Update
+    suspend fun update(categoria: Categoria)
+
+    // NOVO: Função para deletar uma categoria
+    @Delete
+    suspend fun delete(categoria: Categoria)
 }

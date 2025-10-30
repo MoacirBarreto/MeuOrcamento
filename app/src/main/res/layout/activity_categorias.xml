@@ -1,44 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".ui.CategoriasActivity">
 
-    <!-- 1. Adicione a AppBarLayout e a Toolbar aqui -->
+    <!-- 1. ADICIONE A TOOLBAR AQUI -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        android:layout_height="wrap_content">
 
         <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
+            android:id="@+id/toolbarCategorias"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="@string/app_name"
-            style="@style/Widget.App.Toolbar"/>
+            style="@style/Widget.App.Toolbar" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- 2. Ajuste o RecyclerView para ficar abaixo da AppBar -->
+    <!-- 2. AJUSTE O RECYCLERVIEW -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewLancamentos"
+        android:id="@+id/recyclerViewCategorias"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="8dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:listitem="@layout/item_lancamento" />
+        tools:listitem="@layout/item_categoria" />
 
-    <!-- Seu FloatingActionButton permanece igual -->
+    <!-- O FloatingActionButton permanece o mesmo -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabAdicionarLancamento"
+        android:id="@+id/fabAdicionarCategoria"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:contentDescription="@string/adicionar_novo_lancamento"
+        android:contentDescription="Adicionar nova categoria"
         app:srcCompat="@drawable/ic_add" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

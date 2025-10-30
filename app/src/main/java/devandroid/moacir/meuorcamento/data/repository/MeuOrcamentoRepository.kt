@@ -35,6 +35,15 @@ class MeuOrcamentoRepository(
     suspend fun inserirCategoria(categoria: Categoria) {
         categoriaDao.inserir(categoria)
     }
+    // NOVO: Função para atualizar uma categoria
+    suspend fun updateCategoria(categoria: Categoria) {
+        categoriaDao.update(categoria)
+    }
+
+    // NOVO: Função para deletar uma categoria
+    suspend fun deletarCategoria(categoria: Categoria) {
+        categoriaDao.delete(categoria)
+    }
 
     // --- Operações de Lançamento ---
 
@@ -51,5 +60,11 @@ class MeuOrcamentoRepository(
      */
     suspend fun inserirLancamento(lancamento: Lancamento) {
         lancamentoDao.inserir(lancamento)
+    }
+    suspend fun deletarLancamento(lancamento: Lancamento) {
+        lancamentoDao.delete(lancamento)
+    }
+    suspend fun updateLancamento(lancamento: Lancamento) {
+        lancamentoDao.update(lancamento)
     }
 }

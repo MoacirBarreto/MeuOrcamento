@@ -1,9 +1,26 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
     <style name="Base.Theme.MeuOrcamento" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/purple_500</item> <!-- Usa a cor que definimos -->
+        <item name="colorOnPrimary">@color/white</item>      <!-- Usa a cor que definimos -->
+        <!-- colorPrimaryVariant não é tão usado no Material 3, pode até ser removido -->
+        <item name="colorPrimaryVariant">@color/purple_500</item>
     </style>
 
+    <style name="Widget.App.Toolbar" parent="Widget.Material3.Toolbar">
+        <item name="android:background">?attr/colorPrimary</item>
+        <item name="titleTextColor">?attr/colorOnPrimary</item>
+        <!-- Este tema garante que os ícones (como o menu) também usem a cor "onPrimary" (geralmente branco) -->
+        <item name="android:theme">@style/ThemeOverlay.Material3.Dark.ActionBar</item>
+        <item name="popupTheme">@style/Theme.App.PopupMenu</item>
+    </style>
     <style name="Theme.MeuOrcamento" parent="Base.Theme.MeuOrcamento" />
+    <style name="Theme.App.PopupMenu" parent="ThemeOverlay.Material3.Light">
+        <!--
+          Este estilo usa o tema "Light" do Material 3 como base.
+          Isso resulta em um fundo de popup claro com texto escuro,
+          o que resolve o problema de legibilidade.
+        -->
+    </style>
+
 </resources>

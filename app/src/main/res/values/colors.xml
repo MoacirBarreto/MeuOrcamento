@@ -4,4 +4,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="receita">#4CAF50</color>
     <color name="despesa">#F44336</color>
+    <color name="purple_500">#6200EE</color> <!-- Um tom de roxo/azul para a barra -->
+
 </resources>
