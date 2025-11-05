@@ -4,6 +4,7 @@ import devandroid.moacir.meuorcamento.data.dao.CategoriaDao
 import devandroid.moacir.meuorcamento.data.dao.LancamentoDao
 import devandroid.moacir.meuorcamento.data.model.Categoria
 import devandroid.moacir.meuorcamento.data.model.Lancamento
+import devandroid.moacir.meuorcamento.data.model.LancamentoComCategoria
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -17,54 +18,65 @@ class MeuOrcamentoRepository(
     private val lancamentoDao: LancamentoDao,
     private val categoriaDao: CategoriaDao
 ) {
+    // Altere o tipo de retorno aqui
+    val todosLancamentos: Flow<List<LancamentoComCategoria>> =
+        lancamentoDao.getTodosLancamentosComCategoria()
 
     // --- Operações de Categoria ---
 
-    /**
-     * Retorna um fluxo com todas as categorias, ordenadas por nome.
-     * O Flow garante que a UI seja atualizada automaticamente quando os dados mudarem.
-     */
     fun getTodasCategorias(): Flow<List<Categoria>> {
         return categoriaDao.buscarTodas()
     }
 
-    /**
-     * Insere uma nova categoria no banco de dados.
-     * Esta é uma operação assíncrona.
-     */
     suspend fun inserirCategoria(categoria: Categoria) {
         categoriaDao.inserir(categoria)
     }
-    // NOVO: Função para atualizar uma categoria
-    suspend fun updateCategoria(categoria: Categoria) {
+
+    suspend fun updateCategoria(categoria: List<Categoria>) {
         categoriaDao.update(categoria)
     }
 
-    // NOVO: Função para deletar uma categoria
     suspend fun deletarCategoria(categoria: Categoria) {
         categoriaDao.delete(categoria)
     }
 
     // --- Operações de Lançamento ---
 
-    /**
-     * Retorna um fluxo com todos os lançamentos, ordenados por data decrescente.
-     */
-    fun getTodosLancamentos(): Flow<List<Lancamento>> {
+    fun getTodosLancamentosSimples(): Flow<List<Lancamento>> {
         return lancamentoDao.buscarTodos()
     }
 
-    /**
-     * Insere um novo lançamento no banco de dados.
-     * Esta é uma operação assíncrona.
-     */
     suspend fun inserirLancamento(lancamento: Lancamento) {
         lancamentoDao.inserir(lancamento)
     }
+
     suspend fun deletarLancamento(lancamento: Lancamento) {
         lancamentoDao.delete(lancamento)
     }
+
     suspend fun updateLancamento(lancamento: Lancamento) {
         lancamentoDao.update(lancamento)
+    }
+
+    suspend fun contarCategorias(): Int {
+        return categoriaDao.contar()
+    }
+
+    // Este método já deve retornar o Flow com o tipo combinado
+    fun getLancamentosComCategoria(): Flow<List<LancamentoComCategoria>> {
+        return lancamentoDao.getLancamentosComCategoria()
+    }
+    suspend fun insert(lancamento: Lancamento) {
+        lancamentoDao.insert(lancamento)
+    }
+
+    suspend fun update(lancamento: Lancamento) {
+        lancamentoDao.update(lancamento)
+    }
+    suspend fun salvarCategorias(categorias: List<Categoria>) {
+        categoriaDao.inserirOuAtualizarCategorias(categorias)
+    }
+    suspend fun atualizarCategorias(categorias: List<Categoria>) {
+        categoriaDao.inserirOuAtualizarCategorias(categorias)
     }
 }

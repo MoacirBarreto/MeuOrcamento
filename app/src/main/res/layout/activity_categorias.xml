@@ -1,40 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
     tools:context=".ui.CategoriasActivity">
 
-    <!-- 1. ADICIONE A TOOLBAR AQUI -->
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbarCategorias"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            style="@style/Widget.App.Toolbar" />
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <!-- 2. AJUSTE O RECYCLERVIEW -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewCategorias"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:listitem="@layout/item_categoria" />
-
-    <!-- O FloatingActionButton permanece o mesmo -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabAdicionarCategoria"
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:contentDescription="Adicionar nova categoria"
-        app:srcCompat="@drawable/ic_add" />
+        android:text="Edite suas categorias"
+        android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
+        android:layout_marginBottom="16dp"/>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    <!-- Categoria 1 -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editTextCategoria1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Categoria 1" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Categoria 2 -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editTextCategoria2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Categoria 2" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Categoria 3 -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editTextCategoria3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Categoria 3" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Categoria 4 -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editTextCategoria4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Categoria 4" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Categoria 5 -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editTextCategoria5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Categoria 5" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <Button
+        android:id="@+id/buttonSalvarCategorias"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Salvar Alterações" />
+
+</LinearLayout>

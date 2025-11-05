@@ -2,8 +2,10 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="receita">#4CAF50</color>
-    <color name="despesa">#F44336</color>
-    <color name="purple_500">#6200EE</color> <!-- Um tom de roxo/azul para a barra -->
+    <color name="purple_500">#6200EE</color>
+    <color name="receita">#008000</color> <!-- Verde -->
+    <color name="despesa">#FF0000</color> <!-- Um tom de roxo/azul para a barra -->
+    <color name="verde_receita">#008000</color> <!-- Verde escuro para boa legibilidade -->
+    <color name="vermelho_despesa">#B30000</color>
 
 </resources>

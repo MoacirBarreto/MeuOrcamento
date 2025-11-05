@@ -1,93 +1,82 @@
 package devandroid.moacir.meuorcamento.ui.adapter
 
+import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import devandroid.moacir.meuorcamento.R
 import devandroid.moacir.meuorcamento.data.model.Lancamento
-import devandroid.moacir.meuorcamento.data.model.Natureza
+import devandroid.moacir.meuorcamento.data.model.LancamentoComCategoria
+import devandroid.moacir.meuorcamento.data.model.TipoLancamento
+import devandroid.moacir.meuorcamento.databinding.ItemLancamentoBinding
 import java.text.NumberFormat
-import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-// 1. Adicione o callback no construtor do Adapter.
+// Lembre-se de passar o Context no construtor do adapter
 class LancamentoAdapter(
-    private val onClick: (Lancamento) -> Unit,
-    private val onLongClick: (Lancamento) -> Unit
-) : ListAdapter<Lancamento, LancamentoAdapter.LancamentoViewHolder>(LancamentoDiffCallback()) {
+    private val context: Context,
+    private val onClick: (LancamentoComCategoria) -> Unit,
+    private val onLongClick: (LancamentoComCategoria) -> Unit
+) : ListAdapter<LancamentoComCategoria, LancamentoAdapter.LancamentoViewHolder>(LancamentoDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LancamentoViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_lancamento, parent, false)
-        // CORREÇÃO: Passe ambas as funções para o construtor do ViewHolder.
-        return LancamentoViewHolder(view, onClick, onLongClick)
+        val binding = ItemLancamentoBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return LancamentoViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: LancamentoViewHolder, position: Int) {
-        val lancamento = getItem(position)
-        holder.bind(lancamento)
+        holder.bind(getItem(position))
     }
 
-    // 3. ViewHolder modificado para aceitar e usar o callback
-    class LancamentoViewHolder(
-        itemView: View,
-        private val onClick: (Lancamento) -> Unit,
-        private val onLongClick: (Lancamento) -> Unit // Aceita o callback aqui
-    ) : RecyclerView.ViewHolder(itemView) {
+    // O ViewHolder agora precisa do Context para resolver as cores
+    inner class LancamentoViewHolder(private val binding: ItemLancamentoBinding) : RecyclerView.ViewHolder(binding.root) {
 
-        // Encontra as Views no layout do item
-        private val descricaoTextView: TextView = itemView.findViewById(R.id.textViewDescricao)
-        private val valorTextView: TextView = itemView.findViewById(R.id.textViewValor)
-        private val dataTextView: TextView = itemView.findViewById(R.id.textViewData)
+        fun bind(lancamentoComCategoria: LancamentoComCategoria) {
+            // Acesse o objeto 'lancamento' dentro de 'lancamentoComCategoria'
+            val lancamento = lancamentoComCategoria.lancamento
 
-        // Formatadores para moeda e data
-        private val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
-        private val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            binding.textViewDescricao.text = lancamento.descricao
 
-        fun bind(lancamento: Lancamento) {
-            // Preenche os dados do lançamento nas Views
-            descricaoTextView.text = lancamento.descricaoLancamento
-            valorTextView.text = currencyFormatter.format(lancamento.valor)
-            dataTextView.text = dateFormatter.format(lancamento.dataHora)
-
-            // Muda a cor do valor com base na natureza (Receita ou Despesa)
-            val color = when (lancamento.natureza) {
-                Natureza.RECEITA -> ContextCompat.getColor(itemView.context, R.color.receita)
-                Natureza.DESPESA -> ContextCompat.getColor(itemView.context, R.color.despesa)
+            // --- LÓGICA DE CORES AQUI ---
+            val cor: Int
+            if (lancamento.tipo == TipoLancamento.RECEITA) {
+                // Define a cor verde para receitas
+                cor = ContextCompat.getColor(context, R.color.verde_receita)
+            } else {
+                // Define a cor vermelha para despesas
+                cor = ContextCompat.getColor(context, R.color.vermelho_despesa)
             }
-            valorTextView.setTextColor(color)
+            // Aplica a cor ao TextView do valor
+            binding.textViewValor.setTextColor(cor)
 
-            // 4. Configura o listener de clique longo na view principal do item
-            itemView.setOnClickListener {
-                onClick(lancamento) // Chama o callback de clique simples
-            }
 
-            // Listener de clique longo (já existente)
-            itemView.setOnLongClickListener {
-                onLongClick(lancamento)
-                true
-            }
+            // Formatação do valor para moeda local (BRL)
+            val formatadorMoeda = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
+            binding.textViewValor.text = formatadorMoeda.format(lancamento.valor)
+
+            // Formatação da data
+            val formatadorData = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+            binding.textViewData.text = runCatching {
+                formatadorData.format(lancamento.dataHora)
+            }.getOrDefault("Data inválida")
+
+            // Você também pode querer exibir o nome da categoria, se desejar:
+            binding.textViewCategoria.text = lancamentoComCategoria.categoria.nome
         }
     }
 
-    /**
-     * DiffCallback: O cérebro por trás do ListAdapter.
-     * Ele diz ao adapter como calcular as diferenças entre a lista antiga e a nova,
-     * permitindo animações eficientes e automáticas.
-     */
-    class LancamentoDiffCallback : DiffUtil.ItemCallback<Lancamento>() {
-        override fun areItemsTheSame(oldItem: Lancamento, newItem: Lancamento): Boolean {
-            // Os itens são os mesmos se o ID for igual.
-            return oldItem.id == newItem.id
+
+    // Classe auxiliar para calcular a diferença entre listas e otimizar o RecyclerView
+    class LancamentoDiffCallback : DiffUtil.ItemCallback<LancamentoComCategoria>() {
+        override fun areItemsTheSame(oldItem: LancamentoComCategoria, newItem: LancamentoComCategoria): Boolean {
+            return oldItem.lancamento.id == newItem.lancamento.id
         }
 
-        override fun areContentsTheSame(oldItem: Lancamento, newItem: Lancamento): Boolean {
-            // O conteúdo é o mesmo se o objeto inteiro for igual (data class faz isso por nós).
+        override fun areContentsTheSame(oldItem: LancamentoComCategoria, newItem: LancamentoComCategoria): Boolean {
             return oldItem == newItem
         }
     }

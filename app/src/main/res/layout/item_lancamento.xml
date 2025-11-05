@@ -20,12 +20,25 @@
             android:id="@+id/textViewDescricao"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:textAppearance="?attr/textAppearanceTitleMedium"
+            app:layout_constraintEnd_toStartOf="@+id/textViewValor"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/textViewValor"
-            android:layout_marginEnd="16dp"
-            tools:text="Salário do Mês" />
+            tools:text="Salário do Mês Incrivelmente Longo Para Testar o Comportamento do Texto" />
+
+        <!-- Categoria do Lançamento -->
+        <TextView
+            android:id="@+id/textViewCategoria"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            app:layout_constraintStart_toStartOf="@+id/textViewDescricao"
+            app:layout_constraintTop_toBottomOf="@+id/textViewDescricao"
+            tools:text="Salário" />
 
         <!-- Valor do Lançamento -->
         <TextView
@@ -35,19 +48,19 @@
             android:textAppearance="?attr/textAppearanceTitleMedium"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/textViewDescricao"
             tools:text="R$ 3.000,00"
-            tools:textColor="@android:color/holo_green_dark"/>
+            tools:textColor="@android:color/holo_green_dark" />
 
         <!-- Data do Lançamento -->
         <TextView
             android:id="@+id/textViewData"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:textAppearance="?attr/textAppearanceBodySmall"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textViewDescricao"
+            app:layout_constraintBottom_toBottomOf="@+id/textViewCategoria"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/textViewCategoria"
             tools:text="28/10/2025" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -21,7 +21,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        // Configuração do KSP para o Room (já estava correta)
         ksp {
             arg("room.schemaLocation", "$projectDir/schemas")
         }
@@ -49,17 +48,17 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
 
-    // Room - Agora usando KSP e as dependências do TOML
+    // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler) // <<< MUDANÇA PRINCIPAL: DE 'kapt' PARA 'ksp'
+    implementation(libs.androidx.ui.android)
+    ksp(libs.androidx.room.compiler)
 
     // Animated Vector Drawable
     implementation(libs.androidx.vectordrawable.animated)
@@ -68,19 +67,16 @@ dependencies {
     implementation(libs.google.code.gson)
 
     // ViewModel and Lifecycle
-    // Use as versões do TOML se estiverem lá, senão defina aqui
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.3") // Versão estável recomendada
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.3")  // Versão estável recomendada
+    implementation(libs.androidx.lifecycle.viewmodel.ktx) 
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
 
     // Coroutines
-    // Use as versões do TOML se estiverem lá, senão defina aqui
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
 
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-
-    // A DECLARAÇÃO ANTIGA E DUPLICADA DO ROOM FOI REMOVIDA DAQUI
 }

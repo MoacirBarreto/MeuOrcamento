@@ -1,128 +1,196 @@
 package devandroid.moacir.meuorcamento.ui.dialog
 
+import android.app.DatePickerDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Button
-import android.widget.TextView
+import android.widget.EditText
+import android.widget.RadioButton
+import android.widget.RadioGroup
 import android.widget.Toast
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.google.android.material.chip.ChipGroup
-import com.google.android.material.datepicker.MaterialDatePicker
-import com.google.android.material.textfield.TextInputEditText
 import devandroid.moacir.meuorcamento.R
+import devandroid.moacir.meuorcamento.data.model.Categoria
 import devandroid.moacir.meuorcamento.data.model.Lancamento
-import devandroid.moacir.meuorcamento.data.model.Natureza
-import devandroid.moacir.meuorcamento.ui.viewmodel.MainViewModel
-import java.text.SimpleDateFormat
-import java.util.Locale
-import java.util.TimeZone
+import devandroid.moacir.meuorcamento.data.model.TipoLancamento
+import java.math.BigDecimal
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
-// 1. Modifique o construtor para aceitar um Lançamento opcional (nullable)
 class AddLancamentoBottomSheet(
-    private val viewModel: MainViewModel,
-    private val lancamentoParaEditar: Lancamento? = null // Se for null, é modo de criação
+    private val lancamentoParaEditar: Lancamento? = null,
+    private val categorias: List<Categoria>,
+    private val onSave: (Lancamento) -> Unit
 ) : BottomSheetDialogFragment() {
 
-    private var dataSelecionada: Long = System.currentTimeMillis()
-    private val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    // Views do Layout
+    private lateinit var editTextDescricao: EditText
+    private lateinit var editTextValor: EditText
+    private lateinit var radioGroupTipo: RadioGroup
+    private lateinit var radioButtonReceita: RadioButton
+    private lateinit var radioButtonDespesa: RadioButton
+    private lateinit var autoCompleteCategoria: AutoCompleteTextView
+    private lateinit var buttonSalvar: Button
+    private lateinit var editTextData: EditText // Nome atualizado para clareza
+
+    // Variável de estado para a data, usando apenas LocalDate
+    private var dataSelecionada: LocalDate = LocalDate.now()
+    private var categoriaSelecionada: Categoria? = null
+
+    // Formatter para ser usado em múltiplos locais
+    private val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.dialog_add_lancamento, container, false)
+        return inflater.inflate(R.layout.bottom_sheet_add_lancamento, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        inicializarViews(view)
+        setupCategorySelector()
+        setupClickListeners()
 
-        // Encontra as views
-        val tituloTextView = view.findViewById<TextView>(R.id.tituloDialog) // Supondo que você adicione um ID ao título
-        val editTextDescricao = view.findViewById<TextInputEditText>(R.id.editTextDescricao)
-        val editTextValor = view.findViewById<TextInputEditText>(R.id.editTextValor)
-        val editTextData = view.findViewById<TextInputEditText>(R.id.editTextData)
-        val chipGroupNatureza = view.findViewById<ChipGroup>(R.id.chipGroupNatureza)
-        val buttonSalvar = view.findViewById<Button>(R.id.buttonSalvar)
-
-        // 2. Verifica se está em modo de edição e pré-preenche os campos
         if (lancamentoParaEditar != null) {
-            tituloTextView.text = "Editar Lançamento"
-            buttonSalvar.text = "Atualizar Lançamento"
-            editTextDescricao.setText(lancamentoParaEditar.descricaoLancamento)
-            editTextValor.setText(lancamentoParaEditar.valor.toPlainString()) // toPlainString() evita notação científica
-            dataSelecionada = lancamentoParaEditar.dataHora
-            if (lancamentoParaEditar.natureza == Natureza.RECEITA) {
-                chipGroupNatureza.check(R.id.chipReceita)
-            } else {
-                chipGroupNatureza.check(R.id.chipDespesa)
-            }
+            preencherDadosParaEdicao(lancamentoParaEditar)
         } else {
-            // Modo de criação: Define um valor padrão
-            chipGroupNatureza.check(R.id.chipReceita)
-        }
-
-        editTextData.setText(dateFormatter.format(dataSelecionada))
-        editTextData.setOnClickListener { showDatePicker() }
-
-        buttonSalvar.setOnClickListener {
-            // A lógica de validação continua a mesma
-            val descricao = editTextDescricao.text.toString()
-            val valorStr = editTextValor.text.toString().replace(',', '.')
-            val naturezaSelecionadaId = chipGroupNatureza.checkedChipId
-
-            if (descricao.isBlank() || valorStr.isBlank() || naturezaSelecionadaId == View.NO_ID) {
-                Toast.makeText(context, "Preencha todos os campos", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val valor = valorStr.toBigDecimalOrNull()
-            if (valor == null) {
-                Toast.makeText(context, "Valor inválido", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val natureza = if (naturezaSelecionadaId == R.id.chipReceita) Natureza.RECEITA else Natureza.DESPESA
-
-            // 3. Lógica para decidir se vai ATUALIZAR ou ADICIONAR
-            if (lancamentoParaEditar != null) {
-                // Modo Edição: cria um novo objeto com o ID original e chama o ViewModel para atualizar
-                val lancamentoAtualizado = lancamentoParaEditar.copy(
-                    descricaoLancamento = descricao,
-                    valor = valor,
-                    dataHora = dataSelecionada,
-                    natureza = natureza
-                    // categoriaId permanece a mesma do lançamento original
-                )
-                viewModel.atualizarLancamento(lancamentoAtualizado)
-            } else {
-                // Modo Criação: chama o ViewModel para adicionar um novo
-                viewModel.adicionarLancamento(
-                    descricao = descricao,
-                    valor = valor,
-                    categoriaId = 1, // Categoria de exemplo
-                    natureza = natureza,
-                    data = dataSelecionada
-                )
-            }
-            dismiss() // Fecha o BottomSheet
+            // Para um novo lançamento, define a data atual e atualiza o campo de texto
+            dataSelecionada = LocalDate.now()
+            atualizarCampoData()
         }
     }
 
-    private fun showDatePicker() {
-        val datePicker = MaterialDatePicker.Builder.datePicker()
-            .setTitleText("Selecione a data")
-            .setSelection(dataSelecionada)
-            .build()
+    private fun inicializarViews(view: View) {
+        editTextDescricao = view.findViewById(R.id.editTextDescricao)
+        editTextValor = view.findViewById(R.id.editTextValor)
+        radioGroupTipo = view.findViewById(R.id.radioGroupTipo)
+        radioButtonReceita = view.findViewById(R.id.radioButtonReceita)
+        radioButtonDespesa = view.findViewById(R.id.radioButtonDespesa)
+        autoCompleteCategoria = view.findViewById(R.id.autoCompleteCategoria)
+        buttonSalvar = view.findViewById(R.id.buttonSalvar)
+        // O ID no XML ainda é editTextDataHora, mas a variável é editTextData
+        editTextData = view.findViewById(R.id.editTextDataHora)
+    }
 
-        datePicker.addOnPositiveButtonClickListener { selection ->
-            val timeZone = TimeZone.getDefault()
-            val offset = timeZone.getOffset(selection)
-            dataSelecionada = selection + offset
-            view?.findViewById<TextInputEditText>(R.id.editTextData)?.setText(dateFormatter.format(dataSelecionada))
+    private fun setupCategorySelector() {
+        val nomesDasCategorias = categorias.map { it.nome }
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, nomesDasCategorias)
+        autoCompleteCategoria.setAdapter(adapter)
+
+        autoCompleteCategoria.setOnItemClickListener { parent, _, position, _ ->
+            val nomeSelecionado = parent.getItemAtPosition(position) as String
+            categoriaSelecionada = categorias.find { it.nome == nomeSelecionado }
+        }
+    }
+
+    private fun setupClickListeners() {
+        // O listener agora chama a função de data simplificada
+        editTextData.setOnClickListener { mostrarSeletorDeData() }
+        buttonSalvar.setOnClickListener { handleSave() }
+    }
+
+    /**
+     * Preenche os campos do formulário para edição.
+     */
+    private fun preencherDadosParaEdicao(lancamento: Lancamento) {
+        buttonSalvar.text = getString(R.string.action_update)
+        editTextDescricao.setText(lancamento.descricao)
+        editTextValor.setText(lancamento.valor.toPlainString())
+
+        if (lancamento.tipo == TipoLancamento.RECEITA) {
+            radioButtonReceita.isChecked = true
+        } else {
+            radioButtonDespesa.isChecked = true
+        }
+        categoriaSelecionada = categorias.find { it.id == lancamento.categoriaId }
+        categoriaSelecionada?.let {
+            autoCompleteCategoria.setText(it.nome, false)
         }
 
-        datePicker.show(childFragmentManager, "DatePicker")
+        // Define e atualiza a data a partir do objeto de edição
+        dataSelecionada = lancamento.dataHora
+        atualizarCampoData()
+    }
+
+    /**
+     * Valida os campos e chama a função de callback onSave.
+     */
+    private fun handleSave() {
+        val descricao = editTextDescricao.text.toString().trim()
+        val valorStr = editTextValor.text.toString().trim().replace(",", ".")
+        // Garante que o valor seja positivo, conforme a lógica do enum
+        val valorAbsoluto = valorStr.toBigDecimalOrNull()?.abs()
+
+        if (descricao.isBlank() || valorAbsoluto == null) {
+            Toast.makeText(context, "Descrição e Valor são obrigatórios.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (valorAbsoluto.compareTo(BigDecimal.ZERO) == 0) {
+            Toast.makeText(context, "O valor não pode ser zero.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val tipo = when (radioGroupTipo.checkedRadioButtonId) {
+            R.id.radioButtonReceita -> TipoLancamento.RECEITA
+            R.id.radioButtonDespesa -> TipoLancamento.DESPESA
+            else -> {
+                Toast.makeText(context, "Selecione um tipo (Receita ou Despesa).", Toast.LENGTH_SHORT).show()
+                return
+            }
+        }
+
+        if (categoriaSelecionada == null) {
+            Toast.makeText(context, "Selecione uma categoria válida.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Aplica o sinal negativo para despesas
+        val valorFinal = if (tipo == TipoLancamento.DESPESA) valorAbsoluto.negate() else valorAbsoluto
+
+        val lancamentoSalvo = lancamentoParaEditar?.copy(
+            descricao = descricao,
+            valor = valorFinal,
+            tipo = tipo,
+            categoriaId = categoriaSelecionada!!.id,
+            dataHora = dataSelecionada // Salva o LocalDate
+        ) ?: Lancamento(
+            descricao = descricao,
+            valor = valorFinal,
+            tipo = tipo,
+            categoriaId = categoriaSelecionada!!.id,
+            dataHora = dataSelecionada // Salva o LocalDate
+        )
+
+        onSave(lancamentoSalvo)
+        dismiss()
+    }
+
+    // --- Funções Auxiliares para Data (Simplificadas) ---
+
+    private fun mostrarSeletorDeData() {
+        DatePickerDialog(
+            requireContext(),
+            { _, year, month, dayOfMonth ->
+                // Atualiza a data selecionada com a escolha do usuário
+                dataSelecionada = LocalDate.of(year, month + 1, dayOfMonth)
+                // Atualiza o campo de texto para refletir a nova data
+                atualizarCampoData()
+            },
+            dataSelecionada.year,
+            dataSelecionada.monthValue - 1, // Calendar usa mês 0-11
+            dataSelecionada.dayOfMonth
+        ).show()
+    }
+
+    private fun atualizarCampoData() {
+        // Usa o formatter definido no topo da classe
+        editTextData.setText(dataSelecionada.format(dateFormatter))
     }
 }

@@ -1,35 +1,44 @@
 package devandroid.moacir.meuorcamento.data
 
 import androidx.room.TypeConverter
-import devandroid.moacir.meuorcamento.data.model.Natureza
+import devandroid.moacir.meuorcamento.data.model.TipoLancamento
 import java.math.BigDecimal
+import java.time.LocalDate // ✅ Importe LocalDate
 
 class Converters {
-    /**
-     * Converte uma String (armazenada no banco) de volta para BigDecimal.
-     */
+
+    // --- Conversores para BigDecimal <-> String ---
     @TypeConverter
     fun fromString(value: String?): BigDecimal? {
         return value?.let { BigDecimal(it) }
     }
 
-    /**
-     * Converte um BigDecimal para String para poder ser salvo no banco.
-     */
     @TypeConverter
     fun bigDecimalToString(bigDecimal: BigDecimal?): String? {
         return bigDecimal?.toPlainString()
     }
 
-    /**
-     * Converte uma String (armazenada no banco, ex: "RECEITA") de volta para o Enum Natureza.
-     */
+    // --- ✅ Conversores para LocalDate <-> Long (Epoch Day) ---
     @TypeConverter
-    fun toNatureza(value: String) = enumValueOf<Natureza>(value)
+    fun fromEpochDay(value: Long?): LocalDate? {
+        // Converte o número de dias desde 1970-01-01 para um objeto LocalDate
+        return value?.let { LocalDate.ofEpochDay(it) }
+    }
 
-    /**
-     * Converte o Enum Natureza para uma String para poder ser salvo no banco.
-     */
     @TypeConverter
-    fun fromNatureza(value: Natureza) = value.name
+    fun localDateToEpochDay(date: LocalDate?): Long? {
+        // Converte o objeto LocalDate para um número de dias desde 1970-01-01
+        return date?.toEpochDay()
+    }
+
+    // --- Conversores para TipoLancamento (Enum) <-> String ---
+    @TypeConverter
+    fun fromStringToTipoLancamento(value: String?): TipoLancamento? {
+        return value?.let { enumValueOf<TipoLancamento>(it) }
+    }
+
+    @TypeConverter
+    fun tipoLancamentoToString(tipo: TipoLancamento?): String? {
+        return tipo?.name
+    }
 }

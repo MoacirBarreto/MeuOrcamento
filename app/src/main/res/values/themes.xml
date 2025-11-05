@@ -22,5 +22,12 @@
           o que resolve o problema de legibilidade.
         -->
     </style>
+    <!-- Em res/values/styles.xml -->
+    <style name="Widget.MeuOrcamento.TextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">16dp</item>
+    </style>
+
 
 </resources>

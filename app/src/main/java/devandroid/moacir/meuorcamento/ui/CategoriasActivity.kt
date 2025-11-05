@@ -1,101 +1,114 @@
 package devandroid.moacir.meuorcamento.ui
 
 import android.os.Bundle
-import android.widget.EditText
+import android.widget.Button
+import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager // Import necessário
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import devandroid.moacir.meuorcamento.MeuOrcamentoApplication
+import androidx.lifecycle.repeatOnLifecycle
+import com.google.android.material.textfield.TextInputEditText
 import devandroid.moacir.meuorcamento.R
+import devandroid.moacir.meuorcamento.data.AppDatabase
 import devandroid.moacir.meuorcamento.data.model.Categoria
-import devandroid.moacir.meuorcamento.ui.adapter.CategoriaAdapter
-import devandroid.moacir.meuorcamento.ui.viewmodel.MainViewModel
-import devandroid.moacir.meuorcamento.ui.viewmodel.ViewModelFactory
+import devandroid.moacir.meuorcamento.data.repository.MeuOrcamentoRepository
+import devandroid.moacir.meuorcamento.ui.viewmodel.CategoriasViewModel
+import devandroid.moacir.meuorcamento.ui.viewmodel.CategoriasViewModelFactory
 import kotlinx.coroutines.launch
 
 class CategoriasActivity : AppCompatActivity() {
 
-    private val mainViewModel: MainViewModel by viewModels {
-        ViewModelFactory((application as MeuOrcamentoApplication).repository)
+    // ✅ CORREÇÃO: Agora usa o ViewModel e a Factory corretos.
+    private val viewModel: CategoriasViewModel by viewModels {
+        val database = AppDatabase.getDatabase(applicationContext)
+        val repository = MeuOrcamentoRepository(database.lancamentoDao(), database.categoriaDao())
+        CategoriasViewModelFactory(repository)
     }
-    private lateinit var categoriaAdapter: CategoriaAdapter
+
+    // Lista para guardar a referência dos campos de texto da UI.
+    private lateinit var editTexts: List<TextInputEditText>
+
+    // Lista para armazenar o estado original das categorias carregadas do banco.
+    private lateinit var categoriasAtuais: List<Categoria>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_categorias)
 
-        val toolbar: MaterialToolbar = findViewById(R.id.toolbarCategorias)
-        setSupportActionBar(toolbar)
-        supportActionBar?.title = "Gerenciar Categorias"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        title = "Editar Categorias"
 
-        setupRecyclerView()
-        observeCategorias()
+        inicializarViews()
+        observarCategorias()
+        configurarBotaoSalvar()
+    }
 
-        findViewById<FloatingActionButton>(R.id.fabAdicionarCategoria).setOnClickListener {
-            mostrarDialogoDeCategoria(null)
+    private fun inicializarViews() {
+        editTexts = listOf(
+            findViewById(R.id.editTextCategoria1),
+            findViewById(R.id.editTextCategoria2),
+            findViewById(R.id.editTextCategoria3),
+            findViewById(R.id.editTextCategoria4),
+            findViewById(R.id.editTextCategoria5)
+        )
+    }
+
+    private fun observarCategorias() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // ✅ CORREÇÃO: Observa a propriedade 'categorias' do novo ViewModel.
+                viewModel.categorias.collect { categorias ->
+                    if (categorias.isNotEmpty()) {
+                        categoriasAtuais = categorias
+                        preencherCampos(categorias)
+                    }
+                }
+            }
         }
+    }
+
+    private fun preencherCampos(categorias: List<Categoria>) {
+        categorias.forEachIndexed { index, categoria ->
+            if (index < editTexts.size) {
+                editTexts[index].setText(categoria.nome)
+            }
+        }
+    }
+
+    private fun configurarBotaoSalvar() {
+        val btnSalvar: Button = findViewById(R.id.buttonSalvarCategorias)
+        btnSalvar.setOnClickListener {
+            salvarAlteracoes()
+        }
+    }
+
+    private fun salvarAlteracoes() {
+        if (!::categoriasAtuais.isInitialized) {
+            Toast.makeText(this, "Aguarde o carregamento das categorias.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val nomesAtualizados = editTexts.map { it.text.toString().trim() }
+
+        if (nomesAtualizados.any { it.isBlank() }) {
+            Toast.makeText(this, "Nenhum nome de categoria pode ficar em branco.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val categoriasParaSalvar = categoriasAtuais.mapIndexed { index, categoriaOriginal ->
+            categoriaOriginal.copy(nome = nomesAtualizados[index])
+        }
+
+        // ✅ CORREÇÃO: A chamada agora é feita no CategoriasViewModel, que sabe como salvar.
+        viewModel.atualizarListaDeCategorias(categoriasParaSalvar)
+
+        Toast.makeText(this, "Categorias salvas com sucesso!", Toast.LENGTH_SHORT).show()
+        finish()
     }
 
     override fun onSupportNavigateUp(): Boolean {
         onBackPressedDispatcher.onBackPressed()
         return true
-    }
-
-    private fun setupRecyclerView() {
-        categoriaAdapter = CategoriaAdapter(
-            onClick = { categoria -> mostrarDialogoDeCategoria(categoria) },
-            onLongClick = { categoria -> mostrarDialogoDeExclusao(categoria) }
-        )
-        val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewCategorias)
-        recyclerView.adapter = categoriaAdapter
-        // CORREÇÃO APLICADA AQUI:
-        recyclerView.layoutManager = LinearLayoutManager(this)
-    }
-
-    private fun observeCategorias() {
-        lifecycleScope.launch {
-            mainViewModel.todasCategorias.collect { categorias ->
-                categoriaAdapter.submitList(categorias)
-            }
-        }
-    }
-
-    private fun mostrarDialogoDeCategoria(categoria: Categoria?) {
-        val dialogView = layoutInflater.inflate(R.layout.dialog_edit_text, null)
-        val editText = dialogView.findViewById<EditText>(R.id.editText)
-        val title = if (categoria == null) "Nova Categoria" else "Editar Categoria"
-        if (categoria != null) {
-            editText.setText(categoria.nome)
-        }
-        AlertDialog.Builder(this)
-            .setTitle(title)
-            .setView(dialogView)
-            .setPositiveButton("Salvar") { _, _ ->
-                val nome = editText.text.toString()
-                if (nome.isNotBlank()) {
-                    if (categoria == null) {
-                        mainViewModel.adicionarCategoria(nome)
-                    } else {
-                        mainViewModel.atualizarCategoria(categoria.copy(nome = nome))
-                    }
-                }
-            }
-            .setNegativeButton("Cancelar", null)
-            .show()
-    }
-
-    private fun mostrarDialogoDeExclusao(categoria: Categoria) {
-        AlertDialog.Builder(this)
-            .setTitle("Excluir Categoria")
-            .setMessage("Tem certeza que deseja excluir a categoria \"${categoria.nome}\"?\n\nAtenção: Isso pode causar problemas se houver lançamentos associados a ela.")
-            .setPositiveButton("Excluir") { _, _ -> mainViewModel.deletarCategoria(categoria) }
-            .setNegativeButton("Cancelar", null)
-            .show()
     }
 }

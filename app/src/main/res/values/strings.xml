@@ -11,4 +11,14 @@
     <string name="nome_da_categoria">Nome da Categoria</string>
     <string name="gerenciar_categorias">Gerenciar Categorias</string>
     <string name="adicionar_novo_lancamento">Adicionar novo lançamento</string>
+    <string name="descricao_add">Descrição do Lançamento</string>
+    <string name="adicionar_lancamento_titulo">Adicionar Lançamento</string>
+    <string name="valor_r">Valor (R$)</string>
+    <string name="tipo_de_lancamento">Tipo de Lançamento</string>
+    <string name="receita_add">Receita</string>
+    <string name="despesa_add">Despesa</string>
+    <string name="action_update">Atualizar</string>
+    <string name="data_e_hora">Data do lançamento</string>
+    <string name="salvar">Salvar</string>
+    <string name="categoria_hint">Categoria do Lançamento</string>
 </resources>
