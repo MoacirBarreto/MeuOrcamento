@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Meu Orçamento Pessoal</string>
+
     <string name="novo_lancamento">Novo Lançamento</string>
     <string name="descricao">Descrição</string>
     <string name="valor">Valor</string>
@@ -21,4 +21,16 @@
     <string name="data_e_hora">Data do lançamento</string>
     <string name="salvar">Salvar</string>
     <string name="categoria_hint">Categoria do Lançamento</string>
+    <string name="edit_your_expense_categories">Edite suas categorias</string>
+    <string name="category_1_hint">Categoria 1</string>
+    <string name="category_2_hint">Categoria 2</string>
+    <string name="category_3_hint">Categoria 3</string>
+    <string name="category_4_hint">Categoria 4</string>
+    <string name="category_5_hint">Categoria 5</string>
+    <string name="save_changes">Salvar alterações</string>
+    <string name="editar_categorias">Editar Categorias</string>
+    <string name="confirmar_exclusao_titulo">Confirmar Exclusão</string>
+    <string name="confirmar_exclusao_mensagem">Tem certeza de que deseja excluir o lançamento \"%1$s\"? Esta ação não pode ser desfeita.</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="excluir">Excluir</string>
 </resources>

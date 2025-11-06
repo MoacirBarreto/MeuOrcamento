@@ -16,6 +16,9 @@ interface CategoriaDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun inserirOuAtualizarCategorias(categorias: List<Categoria>)
 
+    @Update
+    suspend fun updateCategorias(categorias: List<Categoria>)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun inserir(categoria: Categoria)
 
@@ -30,6 +33,9 @@ interface CategoriaDao {
     // NOVO: Função para deletar uma categoria
     @Delete
     suspend fun delete(categoria: Categoria)
+
+    @Query("DELETE FROM categorias") // Adicione esta consulta
+    suspend fun deleteAll()
 
     @Query("SELECT COUNT(id) FROM categorias")
     suspend fun contar(): Int

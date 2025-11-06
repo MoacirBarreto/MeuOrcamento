@@ -3,7 +3,7 @@ package devandroid.moacir.meuorcamento.data
 import androidx.room.TypeConverter
 import devandroid.moacir.meuorcamento.data.model.TipoLancamento
 import java.math.BigDecimal
-import java.time.LocalDate // ✅ Importe LocalDate
+import java.time.LocalDate
 
 class Converters {
 

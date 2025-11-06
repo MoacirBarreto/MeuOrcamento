@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,24 +10,13 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Edite suas categorias"
+        android:text="@string/edit_your_expense_categories"
         android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
         android:layout_marginBottom="16dp"/>
 
-    <!-- Categoria 1 -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp">
+    <!-- O campo da Categoria de ID 1 (Receita) foi removido pois não é editável -->
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/editTextCategoria1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Categoria 1" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- Categoria 2 -->
+    <!-- Categoria ID 2 -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -38,10 +26,10 @@
             android:id="@+id/editTextCategoria2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Categoria 2" />
+            android:hint="@string/category_1_hint" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Categoria 3 -->
+    <!-- Categoria ID 3 -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -51,10 +39,10 @@
             android:id="@+id/editTextCategoria3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Categoria 3" />
+            android:hint="@string/category_2_hint" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Categoria 4 -->
+    <!-- Categoria ID 4 -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -64,26 +52,39 @@
             android:id="@+id/editTextCategoria4"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Categoria 4" />
+            android:hint="@string/category_3_hint" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Categoria 5 -->
+    <!-- Categoria ID 5 -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editTextCategoria5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/category_4_hint" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Categoria ID 6 -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/editTextCategoria5"
+            android:id="@+id/editTextCategoria6"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Categoria 5" />
+            android:hint="@string/category_5_hint" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button
         android:id="@+id/buttonSalvarCategorias"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Salvar Alterações" />
+        android:text="@string/save_changes" />
 
 </LinearLayout>

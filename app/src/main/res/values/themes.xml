@@ -1,33 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Base application theme. -->
-    <style name="Base.Theme.MeuOrcamento" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/purple_500</item> <!-- Usa a cor que definimos -->
-        <item name="colorOnPrimary">@color/white</item>      <!-- Usa a cor que definimos -->
-        <!-- colorPrimaryVariant não é tão usado no Material 3, pode até ser removido -->
-        <item name="colorPrimaryVariant">@color/purple_500</item>
-    </style>
-
-    <style name="Widget.App.Toolbar" parent="Widget.Material3.Toolbar">
-        <item name="android:background">?attr/colorPrimary</item>
-        <item name="titleTextColor">?attr/colorOnPrimary</item>
-        <!-- Este tema garante que os ícones (como o menu) também usem a cor "onPrimary" (geralmente branco) -->
-        <item name="android:theme">@style/ThemeOverlay.Material3.Dark.ActionBar</item>
-        <item name="popupTheme">@style/Theme.App.PopupMenu</item>
-    </style>
-    <style name="Theme.MeuOrcamento" parent="Base.Theme.MeuOrcamento" />
-    <style name="Theme.App.PopupMenu" parent="ThemeOverlay.Material3.Light">
+    <!-- Tema base da aplicação -->
+    <style name="Theme.MeuOrcamento" parent="Theme.Material3.DayNight.NoActionBar">
         <!--
-          Este estilo usa o tema "Light" do Material 3 como base.
-          Isso resulta em um fundo de popup claro com texto escuro,
-          o que resolve o problema de legibilidade.
+            Personalize seu tema aqui.
+            Por exemplo, você pode definir as cores primárias, secundárias, etc.
+            <item name="colorPrimary">@color/my_light_primary</item>
         -->
     </style>
-    <!-- Em res/values/styles.xml -->
-    <style name="Widget.MeuOrcamento.TextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginTop">16dp</item>
+    <style name="Widget.App.Toolbar" parent="Widget.AppCompat.Toolbar">
+        <item name="android:background">?attr/colorPrimary</item>
+        <item name="android:theme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
+        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
     </style>
 
+
+    <!-- =================================================================================== -->
+    <!--  Strings Globais do Aplicativo                                                      -->
+    <!-- =================================================================================== -->
+    <string name="app_name">Meu Orçamento</string>
+
+
+    <!-- =================================================================================== -->
+    <!--  Tela Principal (MainActivity)                                                      -->
+    <!-- =================================================================================== -->
+    <!-- Descrições de conteúdo para acessibilidade -->
+    <string name="main_content_description_add_lancamento">Adicionar novo lançamento</string>
+
+    <!-- Itens do Menu da Toolbar -->
+    <string name="main_menu_edit_categories">Editar Categorias</string>
+    <string name="main_menu_settings">Configurações</string> <!-- Exemplo de item futuro -->
+
+    <!-- Rótulos (Labels) da UI -->
+    <string name="main_label_total_receitas">Receitas</string>
+    <string name="main_label_total_despesas">Despesas</string>
+    <string name="main_label_saldo">Saldo</string>
+
+    <!-- Diálogo de Exclusão de Lançamento -->
+    <string name="main_dialog_delete_title">Confirmar Exclusão</string>
+    <string name="main_dialog_delete_message">Tem certeza que deseja excluir o lançamento \"%1$s\"? Esta ação não pode ser desfeita.</string>
+    <string name="main_dialog_button_delete">Excluir</string>
+    <string name="main_dialog_button_cancel">Cancelar</string>
+
+
+    <!-- =================================================================================== -->
+    <!--  Tela/Dialog de Adicionar/Editar Lançamento (AddLancamentoBottomSheet)             -->
+    <!-- =================================================================================== -->
+    <string name="add_lancamento_title_new">Novo Lançamento</string>
+    <string name="add_lancamento_title_edit">Editar Lançamento</string>
+
+    <!-- Rótulos dos Campos -->
+    <string name="add_lancamento_label_natureza">Natureza</string>
+    <string name="add_lancamento_option_receita">Receita</string>
+    <string name="add_lancamento_option_despesa">Despesa</string>
+    <string name="add_lancamento_hint_valor">Valor (Ex: 19,99)</string>
+    <string name="add_lancamento_hint_descricao">Descrição</string>
+    <string name="add_lancamento_label_data">Data</string>
+    <string name="add_lancamento_label_categoria">Categoria</string>
+    <string name="add_lancamento_button_save">Salvar</string>
+
+    <!-- Mensagens de Erro/Validação -->
+    <string name="add_lancamento_error_valor_invalido">Por favor, insira um valor válido.</string>
+    <string name="add_lancamento_error_descricao_vazia">A descrição não pode ficar em branco.</string>
+
+
+    <!-- =================================================================================== -->
+    <!--  Tela de Edição de Categorias (CategoriasActivity)                                  -->
+    <!-- =================================================_================================== -->
+    <string name="categorias_title">Editar Categorias de Despesa</string>
+    <string name="categorias_description">A categoria "Receita" não pode ser alterada. Edite o nome das suas categorias de despesa abaixo.</string>
+    <string name="categorias_button_save">Salvar Alterações</string>
+
+    <!-- Mensagens de Feedback -->
+    <string name="categorias_toast_success">Categorias atualizadas com sucesso!</string>
+    <string name="categorias_toast_error_empty">O nome da categoria não pode estar vazio.</string>
 
 </resources>

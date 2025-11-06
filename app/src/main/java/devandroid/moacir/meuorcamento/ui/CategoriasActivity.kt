@@ -1,7 +1,7 @@
 package devandroid.moacir.meuorcamento.ui
 
 import android.os.Bundle
-import android.widget.Button
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -9,59 +9,68 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.textfield.TextInputEditText
-import devandroid.moacir.meuorcamento.R
 import devandroid.moacir.meuorcamento.data.AppDatabase
 import devandroid.moacir.meuorcamento.data.model.Categoria
 import devandroid.moacir.meuorcamento.data.repository.MeuOrcamentoRepository
-import devandroid.moacir.meuorcamento.ui.viewmodel.CategoriasViewModel
-import devandroid.moacir.meuorcamento.ui.viewmodel.CategoriasViewModelFactory
+import devandroid.moacir.meuorcamento.databinding.ActivityCategoriasBinding
+import devandroid.moacir.meuorcamento.ui.viewmodel.MainViewModel
+import devandroid.moacir.meuorcamento.ui.viewmodel.MainViewModelFactory
 import kotlinx.coroutines.launch
 
 class CategoriasActivity : AppCompatActivity() {
 
-    // ✅ CORREÇÃO: Agora usa o ViewModel e a Factory corretos.
-    private val viewModel: CategoriasViewModel by viewModels {
+    // 1. Inicialização correta do ViewBinding
+    private lateinit var binding: ActivityCategoriasBinding
+
+    // 2. Inicialização do ViewModel usando a factory
+    private val mainViewModel: MainViewModel by viewModels {
         val database = AppDatabase.getDatabase(applicationContext)
         val repository = MeuOrcamentoRepository(database.lancamentoDao(), database.categoriaDao())
-        CategoriasViewModelFactory(repository)
+        MainViewModelFactory(repository)
     }
 
-    // Lista para guardar a referência dos campos de texto da UI.
-    private lateinit var editTexts: List<TextInputEditText>
-
-    // Lista para armazenar o estado original das categorias carregadas do banco.
-    private lateinit var categoriasAtuais: List<Categoria>
+    // 3. Mapa para associar os IDs das categorias aos seus EditTexts
+    private val editTextsMap: MutableMap<Long, TextInputEditText> = mutableMapOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_categorias)
+        // Infla o layout usando o binding
+        binding = ActivityCategoriasBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        title = "Editar Categorias"
+        Log.d("CategoriasActivity", "onCreate: Atividade criada.")
 
-        inicializarViews()
+        // Associa os IDs aos campos de texto do layout
+        inicializarMapaDeViews()
+
+        // Inicia a observação dos dados do ViewModel
         observarCategorias()
+
+        // Configura o listener do botão de salvar
         configurarBotaoSalvar()
     }
 
-    private fun inicializarViews() {
-        editTexts = listOf(
-            findViewById(R.id.editTextCategoria1),
-            findViewById(R.id.editTextCategoria2),
-            findViewById(R.id.editTextCategoria3),
-            findViewById(R.id.editTextCategoria4),
-            findViewById(R.id.editTextCategoria5)
-        )
+    private fun inicializarMapaDeViews() {
+        // Acessa as views através do objeto 'binding'
+        editTextsMap[2L] = binding.editTextCategoria2
+        editTextsMap[3L] = binding.editTextCategoria3
+        editTextsMap[4L] = binding.editTextCategoria4
+        editTextsMap[5L] = binding.editTextCategoria5
+        editTextsMap[6L] = binding.editTextCategoria6
+        Log.d("CategoriasActivity", "inicializarMapaDeViews: Mapa de EditTexts foi preenchido.")
     }
 
     private fun observarCategorias() {
         lifecycleScope.launch {
+            // Garante que a coleta do Flow ocorra apenas quando a Activity está ativa
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // ✅ CORREÇÃO: Observa a propriedade 'categorias' do novo ViewModel.
-                viewModel.categorias.collect { categorias ->
+                Log.d("CategoriasActivity", "observarCategorias: Iniciando a coleta do Flow de categorias.")
+                mainViewModel.todasCategorias.collect { categorias ->
+                    Log.d("CategoriasActivity", "observarCategorias: Novas categorias recebidas do Flow. Total: ${categorias.size}")
                     if (categorias.isNotEmpty()) {
-                        categoriasAtuais = categorias
                         preencherCampos(categorias)
+                    } else {
+                        Log.w("CategoriasActivity", "observarCategorias: A lista de categorias recebida está vazia.")
                     }
                 }
             }
@@ -69,46 +78,44 @@ class CategoriasActivity : AppCompatActivity() {
     }
 
     private fun preencherCampos(categorias: List<Categoria>) {
-        categorias.forEachIndexed { index, categoria ->
-            if (index < editTexts.size) {
-                editTexts[index].setText(categoria.nome)
+        Log.d("CategoriasActivity", "preencherCampos: Tentando preencher os campos de texto.")
+        editTextsMap.forEach { (id, editText) ->
+            val categoriaEncontrada = categorias.find { it.id == id }
+            if (categoriaEncontrada != null) {
+                // Apenas atualiza o texto se for diferente, para evitar loops
+                if (editText.text.toString() != categoriaEncontrada.nome) {
+                    editText.setText(categoriaEncontrada.nome)
+                    Log.i("CategoriasActivity", "preencherCampos: Campo para ID $id preenchido com '${categoriaEncontrada.nome}'.")
+                }
+            } else {
+                Log.w("CategoriasActivity", "preencherCampos: Não foi encontrada categoria para o ID $id no banco de dados.")
             }
         }
     }
 
     private fun configurarBotaoSalvar() {
-        val btnSalvar: Button = findViewById(R.id.buttonSalvarCategorias)
-        btnSalvar.setOnClickListener {
+        binding.buttonSalvarCategorias.setOnClickListener {
             salvarAlteracoes()
         }
     }
 
     private fun salvarAlteracoes() {
-        if (!::categoriasAtuais.isInitialized) {
-            Toast.makeText(this, "Aguarde o carregamento das categorias.", Toast.LENGTH_SHORT).show()
-            return
+        lifecycleScope.launch {
+            val categoriasParaAtualizar = mutableListOf<Categoria>()
+
+            for ((id, editText) in editTextsMap) {
+                val novoNome = editText.text.toString().trim()
+                if (novoNome.isBlank()) {
+                    Toast.makeText(this@CategoriasActivity, "O nome da categoria não pode estar vazio.", Toast.LENGTH_SHORT).show()
+                    return@launch // Aborta o salvamento
+                }
+                categoriasParaAtualizar.add(Categoria(id = id, nome = novoNome))
+            }
+
+            mainViewModel.atualizarCategorias(categoriasParaAtualizar)
+
+            Toast.makeText(this@CategoriasActivity, "Categorias atualizadas com sucesso!", Toast.LENGTH_SHORT).show()
+            finish() // Fecha a activity após salvar
         }
-
-        val nomesAtualizados = editTexts.map { it.text.toString().trim() }
-
-        if (nomesAtualizados.any { it.isBlank() }) {
-            Toast.makeText(this, "Nenhum nome de categoria pode ficar em branco.", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val categoriasParaSalvar = categoriasAtuais.mapIndexed { index, categoriaOriginal ->
-            categoriaOriginal.copy(nome = nomesAtualizados[index])
-        }
-
-        // ✅ CORREÇÃO: A chamada agora é feita no CategoriasViewModel, que sabe como salvar.
-        viewModel.atualizarListaDeCategorias(categoriasParaSalvar)
-
-        Toast.makeText(this, "Categorias salvas com sucesso!", Toast.LENGTH_SHORT).show()
-        finish()
-    }
-
-    override fun onSupportNavigateUp(): Boolean {
-        onBackPressedDispatcher.onBackPressed()
-        return true
     }
 }

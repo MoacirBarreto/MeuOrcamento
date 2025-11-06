@@ -6,13 +6,14 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.semantics.dismiss
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import devandroid.moacir.meuorcamento.data.AppDatabase
 import devandroid.moacir.meuorcamento.data.model.Categoria
-import devandroid.moacir.meuorcamento.data.model.LancamentoComCategoria
 import devandroid.moacir.meuorcamento.data.model.Lancamento
 import devandroid.moacir.meuorcamento.data.repository.MeuOrcamentoRepository
 import devandroid.moacir.meuorcamento.databinding.ActivityMainBinding
@@ -34,33 +35,40 @@ class MainActivity : AppCompatActivity() {
         MainViewModelFactory(repository)
     }
 
-    private val adapter by lazy {
+    private val lancamentoAdapter by lazy {
         LancamentoAdapter(
-            context = this, // Passa o contexto para o adapter usar nas cores
+            context = this,
             onClick = { lancamentoComCategoria ->
-                // ✅ CORREÇÃO: Acessa a propriedade 'lancamento' dentro do objeto para edição
+                // Acessa a propriedade 'lancamento' para passar ao BottomSheet para edição
                 abrirBottomSheet(lancamentoComCategoria.lancamento)
             },
-            onLongClick = { /* Ação de clique longo pode ser implementada aqui */ }
+            onLongClick = { lancamentoComCategoria ->
+                // Extrai o objeto 'lancamento' para o diálogo de exclusão
+                mostrarDialogoDeExclusao(lancamentoComCategoria.lancamento)
+            }
         )
     }
 
     // Propriedade para manter a lista de categorias sempre atualizada,
-    // garantindo que o BottomSheet sempre receba os dados mais recentes.
+    // garantindo que o BottomSheet sempre tenha os dados mais recentes.
     private var listaDeCategoriasAtual: List<Categoria> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // ✅ CORREÇÃO: A inicialização do binding DEVE vir primeiro.
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Configurações iniciais da UI (agora que o 'binding' é seguro de usar)
+        configurarUI()
+        observarDados()
+    }
+
+    /**
+     * Otimização: Agrupa todas as configurações de UI em um único método para maior clareza.
+     */
+    private fun configurarUI() {
         setSupportActionBar(binding.toolbar)
         configurarRecyclerView()
         configurarFab()
-        observarDados()
     }
 
     // --- Configuração do Menu da Toolbar ---
@@ -71,8 +79,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Otimização: Usar 'return when' deixa o código mais conciso.
         return when (item.itemId) {
-            R.id.action_edit_categories -> {
+            R.id.action_edit_categorias -> {
                 startActivity(Intent(this, CategoriasActivity::class.java))
                 true
             }
@@ -80,12 +89,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // --- Configurações da UI ---
+    // --- Configurações dos Componentes da UI ---
 
     private fun configurarRecyclerView() {
-        binding.recyclerViewLancamentos.layoutManager = LinearLayoutManager(this)
-        // ✅ CORREÇÃO: Usa o adapter inicializado via 'lazy'
-        binding.recyclerViewLancamentos.adapter = adapter
+        binding.recyclerViewLancamentos.apply {
+            // Otimização: 'apply' é usado para configurar múltiplas propriedades do mesmo objeto.
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            adapter = lancamentoAdapter // Usa o adapter inicializado via 'lazy'
+        }
     }
 
     private fun configurarFab() {
@@ -97,21 +108,36 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Centraliza a observação de todos os fluxos de dados do ViewModel.
+     * Otimização: Nome do método mais descritivo.
+     * Mostra um diálogo de confirmação antes de excluir um lançamento.
+     */
+    private fun mostrarDialogoDeExclusao(lancamento: Lancamento) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.confirmar_exclusao_titulo)
+            .setMessage(getString(R.string.confirmar_exclusao_mensagem, lancamento.descricao))
+            .setNegativeButton(R.string.cancelar) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setPositiveButton(R.string.excluir) { dialog, _ ->
+                mainViewModel.excluirLancamento(lancamento)
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    /**
+     * Centraliza a observação dos fluxos de dados do ViewModel.
      * Garante que a coleta só aconteça quando a UI estiver visível (STARTED).
      */
     private fun observarDados() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 // Observa o fluxo de lançamentos com categoria e atualiza o adapter.
-                // 'collectLatest' cancela o processamento anterior se um novo dado chegar.
                 launch {
-                    mainViewModel.todosLancamentos.collectLatest { lancamentos ->
-                        adapter.submitList(lancamentos)
-                    }
+                    mainViewModel.todosLancamentos.collectLatest(lancamentoAdapter::submitList)
                 }
 
-                // Observa o fluxo de categorias e atualiza a propriedade da Activity.
+                // Observa o fluxo de categorias e atualiza a propriedade local.
                 // Esta é a chave para manter a lista sempre sincronizada para o BottomSheet.
                 launch {
                     mainViewModel.todasCategorias.collect { categorias ->
@@ -127,13 +153,10 @@ class MainActivity : AppCompatActivity() {
      * Usa a `listaDeCategoriasAtual`, que está sempre sincronizada com o BD.
      */
     private fun abrirBottomSheet(lancamento: Lancamento? = null) {
-        val bottomSheet = AddLancamentoBottomSheet(
+        AddLancamentoBottomSheet(
             lancamentoParaEditar = lancamento,
             categorias = this.listaDeCategoriasAtual, // Sempre usa a lista mais recente
-            onSave = { lancamentoProcessado ->
-                mainViewModel.salvarLancamento(lancamentoProcessado)
-            }
-        )
-        bottomSheet.show(supportFragmentManager, "AddLancamentoBottomSheet")
+            onSave = mainViewModel::salvarLancamento // Otimização: Referência de função
+        ).show(supportFragmentManager, AddLancamentoBottomSheet.TAG)
     }
 }

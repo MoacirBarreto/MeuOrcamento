@@ -66,6 +66,17 @@ class LancamentoAdapter(
 
             // Você também pode querer exibir o nome da categoria, se desejar:
             binding.textViewCategoria.text = lancamentoComCategoria.categoria.nome
+            // --- ✅ IMPLEMENTAÇÃO DOS CLIQUES ---
+            // Configura o clique normal no item
+            binding.root.setOnClickListener {
+                onClick(lancamentoComCategoria)
+            }
+
+            // Configura o clique longo no item
+            binding.root.setOnLongClickListener {
+                onLongClick(lancamentoComCategoria)
+                true // Retorna 'true' para indicar que o evento foi consumido e não deve propagar.
+            }
         }
     }
 

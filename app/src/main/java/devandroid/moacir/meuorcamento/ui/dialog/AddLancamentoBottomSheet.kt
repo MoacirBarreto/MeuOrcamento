@@ -13,6 +13,7 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.Toast
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.textfield.TextInputLayout
 import devandroid.moacir.meuorcamento.R
 import devandroid.moacir.meuorcamento.data.model.Categoria
 import devandroid.moacir.meuorcamento.data.model.Lancamento
@@ -27,22 +28,29 @@ class AddLancamentoBottomSheet(
     private val onSave: (Lancamento) -> Unit
 ) : BottomSheetDialogFragment() {
 
-    // Views do Layout
+    // Views
     private lateinit var editTextDescricao: EditText
     private lateinit var editTextValor: EditText
     private lateinit var radioGroupTipo: RadioGroup
     private lateinit var radioButtonReceita: RadioButton
     private lateinit var radioButtonDespesa: RadioButton
     private lateinit var autoCompleteCategoria: AutoCompleteTextView
+    private lateinit var textInputLayoutCategoria: TextInputLayout // Declaração correta
     private lateinit var buttonSalvar: Button
-    private lateinit var editTextData: EditText // Nome atualizado para clareza
+    private lateinit var editTextData: EditText
 
-    // Variável de estado para a data, usando apenas LocalDate
+    // Variáveis de estado
     private var dataSelecionada: LocalDate = LocalDate.now()
     private var categoriaSelecionada: Categoria? = null
 
-    // Formatter para ser usado em múltiplos locais
+    // Constantes e Formatters
+
+    companion object {
+        const val TAG = "AddLancamentoBottomSheet"
+        private const val ID_CATEGORIA_RECEITA = 1L // ID fixo para a categoria "Receita"
+    }
     private val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -56,11 +64,14 @@ class AddLancamentoBottomSheet(
         inicializarViews(view)
         setupCategorySelector()
         setupClickListeners()
+        observarSelecaoDeTipo()
 
         if (lancamentoParaEditar != null) {
             preencherDadosParaEdicao(lancamentoParaEditar)
         } else {
-            // Para um novo lançamento, define a data atual e atualiza o campo de texto
+            // Garante que o estado inicial para um novo lançamento esteja correto
+            radioButtonDespesa.isChecked = true
+            atualizarVisibilidadeCategoria(false)
             dataSelecionada = LocalDate.now()
             atualizarCampoData()
         }
@@ -73,124 +84,136 @@ class AddLancamentoBottomSheet(
         radioButtonReceita = view.findViewById(R.id.radioButtonReceita)
         radioButtonDespesa = view.findViewById(R.id.radioButtonDespesa)
         autoCompleteCategoria = view.findViewById(R.id.autoCompleteCategoria)
+        textInputLayoutCategoria = view.findViewById(R.id.layoutCategoria)
         buttonSalvar = view.findViewById(R.id.buttonSalvar)
-        // O ID no XML ainda é editTextDataHora, mas a variável é editTextData
         editTextData = view.findViewById(R.id.editTextDataHora)
     }
 
+    private fun observarSelecaoDeTipo() {
+        radioGroupTipo.setOnCheckedChangeListener { _, checkedId ->
+            val isReceita = checkedId == R.id.radioButtonReceita
+            atualizarVisibilidadeCategoria(isReceita)
+        }
+    }
+
+    /**
+     * Centraliza a lógica de UI para quando o tipo de lançamento muda.
+     */
+    private fun atualizarVisibilidadeCategoria(isReceita: Boolean) {
+        if (isReceita) {
+            textInputLayoutCategoria.visibility = View.GONE
+            autoCompleteCategoria.text = null
+            categoriaSelecionada = null
+
+            if (editTextDescricao.text.isBlank() || editTextDescricao.text.toString() == "Despesa Padrão") {
+                editTextDescricao.setText("Receita")
+            }
+        } else {
+            textInputLayoutCategoria.visibility = View.VISIBLE
+            if (editTextDescricao.text.toString() == "Receita") {
+                editTextDescricao.setText("")
+            }
+        }
+    }
+
     private fun setupCategorySelector() {
-        val nomesDasCategorias = categorias.map { it.nome }
+        // Filtra a categoria "Receita" da lista de opções para despesas
+        val categoriasDeDespesa = categorias.filter { it.id != ID_CATEGORIA_RECEITA }
+        val nomesDasCategorias = categoriasDeDespesa.map { it.nome }
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, nomesDasCategorias)
         autoCompleteCategoria.setAdapter(adapter)
 
         autoCompleteCategoria.setOnItemClickListener { parent, _, position, _ ->
             val nomeSelecionado = parent.getItemAtPosition(position) as String
-            categoriaSelecionada = categorias.find { it.nome == nomeSelecionado }
+            categoriaSelecionada = categoriasDeDespesa.find { it.nome == nomeSelecionado }
         }
     }
 
     private fun setupClickListeners() {
-        // O listener agora chama a função de data simplificada
         editTextData.setOnClickListener { mostrarSeletorDeData() }
         buttonSalvar.setOnClickListener { handleSave() }
     }
 
-    /**
-     * Preenche os campos do formulário para edição.
-     */
     private fun preencherDadosParaEdicao(lancamento: Lancamento) {
         buttonSalvar.text = getString(R.string.action_update)
         editTextDescricao.setText(lancamento.descricao)
-        editTextValor.setText(lancamento.valor.toPlainString())
+        editTextValor.setText(lancamento.valor.toPlainString().replace("-", ""))
 
         if (lancamento.tipo == TipoLancamento.RECEITA) {
             radioButtonReceita.isChecked = true
+            atualizarVisibilidadeCategoria(true) // Esconde a categoria
         } else {
             radioButtonDespesa.isChecked = true
-        }
-        categoriaSelecionada = categorias.find { it.id == lancamento.categoriaId }
-        categoriaSelecionada?.let {
-            autoCompleteCategoria.setText(it.nome, false)
+            categoriaSelecionada = categorias.find { it.id == lancamento.categoriaId }
+            categoriaSelecionada?.let { autoCompleteCategoria.setText(it.nome, false) }
+            atualizarVisibilidadeCategoria(false) // Mostra a categoria
         }
 
-        // Define e atualiza a data a partir do objeto de edição
         dataSelecionada = lancamento.dataHora
         atualizarCampoData()
     }
 
-    /**
-     * Valida os campos e chama a função de callback onSave.
-     */
     private fun handleSave() {
         val descricao = editTextDescricao.text.toString().trim()
         val valorStr = editTextValor.text.toString().trim().replace(",", ".")
-        // Garante que o valor seja positivo, conforme a lógica do enum
         val valorAbsoluto = valorStr.toBigDecimalOrNull()?.abs()
 
-        if (descricao.isBlank() || valorAbsoluto == null) {
-            Toast.makeText(context, "Descrição e Valor são obrigatórios.", Toast.LENGTH_SHORT).show()
+        if (descricao.isBlank()) {
+            Toast.makeText(context, "A descrição é obrigatória.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (valorAbsoluto == null || valorAbsoluto.compareTo(BigDecimal.ZERO) == 0) {
+            Toast.makeText(context, "O valor deve ser maior que zero.", Toast.LENGTH_SHORT).show()
             return
         }
 
-        if (valorAbsoluto.compareTo(BigDecimal.ZERO) == 0) {
-            Toast.makeText(context, "O valor não pode ser zero.", Toast.LENGTH_SHORT).show()
-            return
-        }
+        val tipo = if (radioButtonReceita.isChecked) TipoLancamento.RECEITA else TipoLancamento.DESPESA
 
-        val tipo = when (radioGroupTipo.checkedRadioButtonId) {
-            R.id.radioButtonReceita -> TipoLancamento.RECEITA
-            R.id.radioButtonDespesa -> TipoLancamento.DESPESA
-            else -> {
-                Toast.makeText(context, "Selecione um tipo (Receita ou Despesa).", Toast.LENGTH_SHORT).show()
+        val idCategoriaFinal: Long
+        if (tipo == TipoLancamento.RECEITA) {
+            idCategoriaFinal = ID_CATEGORIA_RECEITA
+        } else {
+            if (categoriaSelecionada == null) {
+                Toast.makeText(context, "Selecione uma categoria para a despesa.", Toast.LENGTH_SHORT).show()
                 return
             }
+            idCategoriaFinal = categoriaSelecionada!!.id
         }
 
-        if (categoriaSelecionada == null) {
-            Toast.makeText(context, "Selecione uma categoria válida.", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        // Aplica o sinal negativo para despesas
         val valorFinal = if (tipo == TipoLancamento.DESPESA) valorAbsoluto.negate() else valorAbsoluto
 
         val lancamentoSalvo = lancamentoParaEditar?.copy(
             descricao = descricao,
             valor = valorFinal,
             tipo = tipo,
-            categoriaId = categoriaSelecionada!!.id,
-            dataHora = dataSelecionada // Salva o LocalDate
+            categoriaId = idCategoriaFinal,
+            dataHora = dataSelecionada
         ) ?: Lancamento(
             descricao = descricao,
             valor = valorFinal,
             tipo = tipo,
-            categoriaId = categoriaSelecionada!!.id,
-            dataHora = dataSelecionada // Salva o LocalDate
+            categoriaId = idCategoriaFinal,
+            dataHora = dataSelecionada
         )
 
         onSave(lancamentoSalvo)
         dismiss()
     }
 
-    // --- Funções Auxiliares para Data (Simplificadas) ---
-
     private fun mostrarSeletorDeData() {
         DatePickerDialog(
             requireContext(),
             { _, year, month, dayOfMonth ->
-                // Atualiza a data selecionada com a escolha do usuário
                 dataSelecionada = LocalDate.of(year, month + 1, dayOfMonth)
-                // Atualiza o campo de texto para refletir a nova data
                 atualizarCampoData()
             },
             dataSelecionada.year,
-            dataSelecionada.monthValue - 1, // Calendar usa mês 0-11
+            dataSelecionada.monthValue - 1,
             dataSelecionada.dayOfMonth
         ).show()
     }
 
     private fun atualizarCampoData() {
-        // Usa o formatter definido no topo da classe
         editTextData.setText(dataSelecionada.format(dateFormatter))
     }
 }
