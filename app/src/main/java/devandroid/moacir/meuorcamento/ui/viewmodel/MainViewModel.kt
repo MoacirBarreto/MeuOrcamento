@@ -1,78 +1,95 @@
 package devandroid.moacir.meuorcamento.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import devandroid.moacir.meuorcamento.data.model.Categoria
 import devandroid.moacir.meuorcamento.data.model.Lancamento
-import devandroid.moacir.meuorcamento.data.model.LancamentoComCategoria
+import devandroid.moacir.meuorcamento.data.model.TipoLancamento
 import devandroid.moacir.meuorcamento.data.repository.MeuOrcamentoRepository
-
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 
-// A injeção de dependência é feita aqui pelo construtor.
+/**
+ * Classe de dados para agrupar os totais de forma coesa.
+ */
+data class Totais(
+    val totalReceitas: BigDecimal = BigDecimal.ZERO,
+    val totalDespesas: BigDecimal = BigDecimal.ZERO
+)
+
+/**
+ * ViewModel principal da aplicação.
+ * Responsável por preparar e gerenciar os dados para a MainActivity.
+ */
 class MainViewModel(private val repository: MeuOrcamentoRepository) : ViewModel() {
-    val todosLancamentos: Flow<List<LancamentoComCategoria>> =
-        repository.LancamentosMaisCategoria()
 
-    // Expõe as categorias como um StateFlow (quente), que é a prática recomendada.
-    val todasCategorias: StateFlow<List<Categoria>> = repository.getTodasCategorias()
+    // CORREÇÃO: A propriedade foi tornada pública removendo o 'private'.
+    // Agora a MainActivity pode observar este StateFlow.
+    val todosLancamentos = repository.todosLancamentos.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = emptyList()
+    )
+
+    // Otimização: A mesma abordagem para categorias, garantindo consistência.
+    val todasCategorias: StateFlow<List<Categoria>> = repository.getTodasCategorias().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = emptyList()
+    )
+
+    // Flow que calcula os totais de receitas e despesas a partir dos lançamentos.
+    // A transformação (map) só ocorre quando `todosLancamentos` emite um novo valor.
+    val totais: StateFlow<Totais> = todosLancamentos.map { lancamentos ->
+        // Otimização: Usar partition para dividir a lista em duas de uma só vez.
+        val (receitas, despesas) = lancamentos.partition { it.lancamento.tipo == TipoLancamento.RECEITA }
+
+        val totalReceitas = receitas.sumOf { it.lancamento.valor }
+        val totalDespesas = despesas.sumOf { it.lancamento.valor }
+
+        Totais(totalReceitas, totalDespesas)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = Totais() // Valor inicial seguro
+    )
+
+    // Flow que calcula o saldo total. Deriva diretamente dos totais para ser mais eficiente.
+    val saldoTotal: StateFlow<BigDecimal> = totais.map { it.totalReceitas + it.totalDespesas }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            // Inicia 5s após a UI parar de observar
-            initialValue = emptyList()
-            // Valor inicial enquanto os dados carregam
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = BigDecimal.ZERO
         )
 
     /**
-     * Função única para atualizar a lista de categorias.
-     * Renomeada para ser mais clara e evitar ambiguidade.
+     * Salva um lançamento (novo ou editado).
+     * Otimização: Especifica o Dispatchers.IO para operações de escrita no banco de dados.
      */
-    fun atualizarListaDeCategorias(categorias: List<Categoria>) {
-        viewModelScope.launch { // Executa a operação de banco de dados em segundo plano
-            repository.atualizarCategorias(categorias)
-        }
+    fun salvarLancamento(lancamento: Lancamento) = viewModelScope.launch(Dispatchers.IO) {
+        repository.inserirLancamento(lancamento)
     }
 
-    // --- Lançamentos ---
-
-    // Expõe os lançamentos como um StateFlow
-
-    fun adicionarLancamento(lancamento: Lancamento) {
-        viewModelScope.launch {
-            repository.inserirLancamento(lancamento)
-        }
+    /**
+     * Exclui um lançamento.
+     * Otimização: Especifica o Dispatchers.IO.
+     */
+    fun excluirLancamento(lancamento: Lancamento) = viewModelScope.launch(Dispatchers.IO) {
+        repository.deletarLancamento(lancamento)
     }
 
-    fun atualizarLancamento(lancamento: Lancamento) {
-        viewModelScope.launch {
-            repository.updateLancamento(lancamento)
-        }
+    /**
+     * Atualiza os nomes das categorias.
+     * Otimização: Especifica o Dispatchers.IO.
+     */
+    fun updateCategorias(categorias: List<Categoria>) = viewModelScope.launch(Dispatchers.IO) {
+        repository.updateCategorias(categorias)
     }
-
-    fun excluirLancamento(lancamento: Lancamento) = viewModelScope.launch {
-        viewModelScope.launch {
-            repository.deletarLancamento(lancamento)
-        }
-    }
-    fun atualizarCategorias(categorias: List<Categoria>) = viewModelScope.launch {
-        repository.atualizarCategorias(categorias)
-    }
-
-
-    fun salvarLancamento(lancamento: Lancamento) {
-        viewModelScope.launch {
-            // Se o id for 0, é um novo lançamento. Caso contrário, é uma atualização.
-            if (lancamento.id == 0L) {
-                repository.inserirLancamento(lancamento)
-            } else {
-                repository.updateLancamento(lancamento)
-            }
-        }
-    }
-
 }
+

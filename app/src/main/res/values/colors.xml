@@ -7,5 +7,7 @@
     <color name="despesa">#FF0000</color> <!-- Um tom de roxo/azul para a barra -->
     <color name="verde_receita">#008000</color> <!-- Verde escuro para boa legibilidade -->
     <color name="vermelho_despesa">#B30000</color>
+    <color name="receita_color">#4CAF50</color> <!-- Example: Green -->
+    <color name="despesa_color">#F44336</color>
 
 </resources>

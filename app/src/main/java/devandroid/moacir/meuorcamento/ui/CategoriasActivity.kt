@@ -112,7 +112,7 @@ class CategoriasActivity : AppCompatActivity() {
                 categoriasParaAtualizar.add(Categoria(id = id, nome = novoNome))
             }
 
-            mainViewModel.atualizarCategorias(categoriasParaAtualizar)
+            mainViewModel.updateCategorias(categoriasParaAtualizar)
 
             Toast.makeText(this@CategoriasActivity, "Categorias atualizadas com sucesso!", Toast.LENGTH_SHORT).show()
             finish() // Fecha a activity após salvar

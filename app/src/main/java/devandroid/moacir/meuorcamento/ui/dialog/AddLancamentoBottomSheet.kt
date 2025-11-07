@@ -6,18 +6,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
-import android.widget.Button
-import android.widget.EditText
-import android.widget.RadioButton
-import android.widget.RadioGroup
-import android.widget.Toast
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.google.android.material.textfield.TextInputLayout
 import devandroid.moacir.meuorcamento.R
 import devandroid.moacir.meuorcamento.data.model.Categoria
 import devandroid.moacir.meuorcamento.data.model.Lancamento
 import devandroid.moacir.meuorcamento.data.model.TipoLancamento
+import devandroid.moacir.meuorcamento.databinding.BottomSheetAddLancamentoBinding
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -26,169 +20,147 @@ class AddLancamentoBottomSheet(
     private val lancamentoParaEditar: Lancamento? = null,
     private val categorias: List<Categoria>,
     private val onSave: (Lancamento) -> Unit
-) : BottomSheetDialogFragment() {
+) : BottomSheetDialogFragment() { // O construtor da superclasse é chamado aqui
 
-    // Views
-    private lateinit var editTextDescricao: EditText
-    private lateinit var editTextValor: EditText
-    private lateinit var radioGroupTipo: RadioGroup
-    private lateinit var radioButtonReceita: RadioButton
-    private lateinit var radioButtonDespesa: RadioButton
-    private lateinit var autoCompleteCategoria: AutoCompleteTextView
-    private lateinit var textInputLayoutCategoria: TextInputLayout // Declaração correta
-    private lateinit var buttonSalvar: Button
-    private lateinit var editTextData: EditText
+    override fun getTheme(): Int {
+        return R.style.Theme_MeuOrcamento_BottomSheetDialog
+    }
 
-    // Variáveis de estado
+    // Bloco init para aplicar o estilo que corrige o problema do teclado
+    init {
+        setStyle(STYLE_NORMAL, R.style.App_BottomSheet_Modal)
+    }
+
+    private var _binding: BottomSheetAddLancamentoBinding? = null
+    private val binding get() = _binding!!
+
     private var dataSelecionada: LocalDate = LocalDate.now()
     private var categoriaSelecionada: Categoria? = null
 
-    // Constantes e Formatters
+    private val dateFormatter: DateTimeFormatter by lazy { DateTimeFormatter.ofPattern("dd/MM/yyyy") }
+    private val categoriasDeDespesa by lazy { categorias.filter { it.id != ID_CATEGORIA_RECEITA } }
 
     companion object {
         const val TAG = "AddLancamentoBottomSheet"
         private const val ID_CATEGORIA_RECEITA = 1L // ID fixo para a categoria "Receita"
     }
-    private val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.bottom_sheet_add_lancamento, container, false)
+    ): View {
+        _binding = BottomSheetAddLancamentoBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        inicializarViews(view)
-        setupCategorySelector()
-        setupClickListeners()
-        observarSelecaoDeTipo()
-
-        if (lancamentoParaEditar != null) {
-            preencherDadosParaEdicao(lancamentoParaEditar)
-        } else {
-            // Garante que o estado inicial para um novo lançamento esteja correto
-            radioButtonDespesa.isChecked = true
-            atualizarVisibilidadeCategoria(false)
-            dataSelecionada = LocalDate.now()
-            atualizarCampoData()
-        }
+        // A linha obsoleta foi removida daqui, pois a correção agora é via estilo.
+        configurarSeletores()
+        configurarListeners()
+        preencherDadosIniciais()
     }
 
-    private fun inicializarViews(view: View) {
-        editTextDescricao = view.findViewById(R.id.editTextDescricao)
-        editTextValor = view.findViewById(R.id.editTextValor)
-        radioGroupTipo = view.findViewById(R.id.radioGroupTipo)
-        radioButtonReceita = view.findViewById(R.id.radioButtonReceita)
-        radioButtonDespesa = view.findViewById(R.id.radioButtonDespesa)
-        autoCompleteCategoria = view.findViewById(R.id.autoCompleteCategoria)
-        textInputLayoutCategoria = view.findViewById(R.id.layoutCategoria)
-        buttonSalvar = view.findViewById(R.id.buttonSalvar)
-        editTextData = view.findViewById(R.id.editTextDataHora)
+    private fun configurarSeletores() {
+        val nomesDasCategorias = categoriasDeDespesa.map { it.nome }
+        val adapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            nomesDasCategorias
+        )
+        binding.autoCompleteCategoria.setAdapter(adapter)
     }
 
-    private fun observarSelecaoDeTipo() {
-        radioGroupTipo.setOnCheckedChangeListener { _, checkedId ->
+    private fun configurarListeners() {
+        binding.radioGroupTipo.setOnCheckedChangeListener { _, checkedId ->
             val isReceita = checkedId == R.id.radioButtonReceita
             atualizarVisibilidadeCategoria(isReceita)
         }
-    }
 
-    /**
-     * Centraliza a lógica de UI para quando o tipo de lançamento muda.
-     */
-    private fun atualizarVisibilidadeCategoria(isReceita: Boolean) {
-        if (isReceita) {
-            textInputLayoutCategoria.visibility = View.GONE
-            autoCompleteCategoria.text = null
-            categoriaSelecionada = null
-
-            if (editTextDescricao.text.isBlank() || editTextDescricao.text.toString() == "Despesa Padrão") {
-                editTextDescricao.setText("Receita")
-            }
-        } else {
-            textInputLayoutCategoria.visibility = View.VISIBLE
-            if (editTextDescricao.text.toString() == "Receita") {
-                editTextDescricao.setText("")
-            }
-        }
-    }
-
-    private fun setupCategorySelector() {
-        // Filtra a categoria "Receita" da lista de opções para despesas
-        val categoriasDeDespesa = categorias.filter { it.id != ID_CATEGORIA_RECEITA }
-        val nomesDasCategorias = categoriasDeDespesa.map { it.nome }
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, nomesDasCategorias)
-        autoCompleteCategoria.setAdapter(adapter)
-
-        autoCompleteCategoria.setOnItemClickListener { parent, _, position, _ ->
+        binding.autoCompleteCategoria.setOnItemClickListener { parent, _, position, _ ->
             val nomeSelecionado = parent.getItemAtPosition(position) as String
             categoriaSelecionada = categoriasDeDespesa.find { it.nome == nomeSelecionado }
-        }
-    }
 
-    private fun setupClickListeners() {
-        editTextData.setOnClickListener { mostrarSeletorDeData() }
-        buttonSalvar.setOnClickListener { handleSave() }
-    }
-
-    private fun preencherDadosParaEdicao(lancamento: Lancamento) {
-        buttonSalvar.text = getString(R.string.action_update)
-        editTextDescricao.setText(lancamento.descricao)
-        editTextValor.setText(lancamento.valor.toPlainString().replace("-", ""))
-
-        if (lancamento.tipo == TipoLancamento.RECEITA) {
-            radioButtonReceita.isChecked = true
-            atualizarVisibilidadeCategoria(true) // Esconde a categoria
-        } else {
-            radioButtonDespesa.isChecked = true
-            categoriaSelecionada = categorias.find { it.id == lancamento.categoriaId }
-            categoriaSelecionada?.let { autoCompleteCategoria.setText(it.nome, false) }
-            atualizarVisibilidadeCategoria(false) // Mostra a categoria
+            // *** LÓGICA ADICIONADA ***
+            // Copia o nome da categoria para a descrição apenas se o campo estiver vazio.
+            // Isso evita apagar uma descrição personalizada que o usuário já digitou.
+            if (binding.editTextDescricao.text.isNullOrBlank()) {
+                binding.editTextDescricao.setText(nomeSelecionado)
+            }
         }
 
-        dataSelecionada = lancamento.dataHora
+        binding.editTextDataHora.setOnClickListener { mostrarSeletorDeData() }
+        binding.buttonSalvar.setOnClickListener { salvarLancamento() }
+    }
+
+    private fun preencherDadosIniciais() {
+        lancamentoParaEditar?.let { lancamento ->
+            // Modo Edição
+            binding.buttonSalvar.text = getString(R.string.action_update)
+            binding.editTextDescricao.setText(lancamento.descricao)
+            binding.editTextValor.setText(lancamento.valor.abs().toPlainString())
+            dataSelecionada = lancamento.dataHora
+
+            if (lancamento.tipo == TipoLancamento.RECEITA) {
+                binding.radioButtonReceita.isChecked = true
+            } else {
+                binding.radioButtonDespesa.isChecked = true
+                categoriaSelecionada = categoriasDeDespesa.find { it.id == lancamento.categoriaId }
+                categoriaSelecionada?.let { binding.autoCompleteCategoria.setText(it.nome, false) }
+            }
+        } ?: run {
+            // Modo Novo Lançamento
+            binding.radioButtonDespesa.isChecked = true
+        }
         atualizarCampoData()
     }
 
-    private fun handleSave() {
-        val descricao = editTextDescricao.text.toString().trim()
-        val valorStr = editTextValor.text.toString().trim().replace(",", ".")
+    private fun atualizarVisibilidadeCategoria(isReceita: Boolean) {
+        binding.layoutCategoria.visibility = if (isReceita) View.GONE else View.VISIBLE
+
+        // Limpa a descrição sempre que o tipo é trocado
+        binding.editTextDescricao.text?.clear()
+
+        if (isReceita) {
+            // Se for receita, esconde o campo de categoria e define a descrição padrão
+            binding.autoCompleteCategoria.setText("", false)
+            categoriaSelecionada = null
+            binding.editTextDescricao.setText(getString(R.string.default_receita_description))
+        }
+        // Se for despesa (o 'else'), a descrição ficará vazia, pronta para ser preenchida pela seleção de categoria.
+    }
+
+    private fun salvarLancamento() {
+        val descricao = binding.editTextDescricao.text.toString().trim()
+        val valorStr = binding.editTextValor.text.toString().trim().replace(",", ".")
         val valorAbsoluto = valorStr.toBigDecimalOrNull()?.abs()
+        val tipo =
+            if (binding.radioButtonReceita.isChecked) TipoLancamento.RECEITA else TipoLancamento.DESPESA
 
-        if (descricao.isBlank()) {
-            Toast.makeText(context, "A descrição é obrigatória.", Toast.LENGTH_SHORT).show()
-            return
-        }
-        if (valorAbsoluto == null || valorAbsoluto.compareTo(BigDecimal.ZERO) == 0) {
-            Toast.makeText(context, "O valor deve ser maior que zero.", Toast.LENGTH_SHORT).show()
-            return
-        }
+        if (!validarInputs(descricao, valorAbsoluto, tipo)) return
 
-        val tipo = if (radioButtonReceita.isChecked) TipoLancamento.RECEITA else TipoLancamento.DESPESA
-
-        val idCategoriaFinal: Long
-        if (tipo == TipoLancamento.RECEITA) {
-            idCategoriaFinal = ID_CATEGORIA_RECEITA
+        val idCategoriaFinal = if (tipo == TipoLancamento.RECEITA) {
+            ID_CATEGORIA_RECEITA
         } else {
-            if (categoriaSelecionada == null) {
-                Toast.makeText(context, "Selecione uma categoria para a despesa.", Toast.LENGTH_SHORT).show()
-                return
-            }
-            idCategoriaFinal = categoriaSelecionada!!.id
+            categoriaSelecionada!!.id
         }
 
-        val valorFinal = if (tipo == TipoLancamento.DESPESA) valorAbsoluto.negate() else valorAbsoluto
+        val valorFinal = if (tipo == TipoLancamento.DESPESA) {
+            valorAbsoluto!!.negate()
+        } else {
+            valorAbsoluto!!
+        }
 
-        val lancamentoSalvo = lancamentoParaEditar?.copy(
-            descricao = descricao,
-            valor = valorFinal,
-            tipo = tipo,
-            categoriaId = idCategoriaFinal,
-            dataHora = dataSelecionada
-        ) ?: Lancamento(
+        val lancamentoSalvo = lancamentoParaEditar?.apply {
+            // Modo Edição: Atualiza o objeto existente
+            this.descricao = descricao
+            this.valor = valorFinal
+            this.tipo = tipo
+            this.categoriaId = idCategoriaFinal
+            this.dataHora = dataSelecionada
+        } ?:
+        // Modo Novo Lançamento: Cria um novo objeto
+        Lancamento(
             descricao = descricao,
             valor = valorFinal,
             tipo = tipo,
@@ -200,20 +172,54 @@ class AddLancamentoBottomSheet(
         dismiss()
     }
 
+    private fun validarInputs(
+        descricao: String,
+        valor: BigDecimal?,
+        tipo: TipoLancamento
+    ): Boolean {
+        binding.layoutDescricao.error = if (descricao.isBlank()) {
+            getString(R.string.add_lancamento_error_descricao_vazia)
+        } else {
+            null
+        }
+        binding.layoutValor.error = if (valor == null || valor.compareTo(BigDecimal.ZERO) == 0) {
+            getString(R.string.add_lancamento_error_valor_invalido)
+        } else {
+            null
+        }
+
+        binding.layoutCategoria.error =
+            if (tipo == TipoLancamento.DESPESA && categoriaSelecionada == null) {
+                getString(R.string.add_lancamento_error_categoria_vazia)
+            } else {
+                null
+            }
+
+        return binding.layoutDescricao.error == null &&
+                binding.layoutValor.error == null &&
+                binding.layoutCategoria.error == null
+    }
+
     private fun mostrarSeletorDeData() {
+        val dataAtual = dataSelecionada
         DatePickerDialog(
             requireContext(),
             { _, year, month, dayOfMonth ->
                 dataSelecionada = LocalDate.of(year, month + 1, dayOfMonth)
                 atualizarCampoData()
             },
-            dataSelecionada.year,
-            dataSelecionada.monthValue - 1,
-            dataSelecionada.dayOfMonth
+            dataAtual.year,
+            dataAtual.monthValue - 1,
+            dataAtual.dayOfMonth
         ).show()
     }
 
     private fun atualizarCampoData() {
-        editTextData.setText(dataSelecionada.format(dateFormatter))
+        binding.editTextDataHora.setText(dataSelecionada.format(dateFormatter))
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

@@ -15,16 +15,15 @@ import java.time.LocalDateTime
  * @property dataHora Usa 'LocalDateTime' para uma manipulação de data moderna e segura.
  *   O Room usará a classe 'Converters' para salvar este campo como Long no banco.
  */
-@Entity(tableName = "Lancamentos")
-@TypeConverters(Converters::class) // 2. Registre os conversores na entidade
+@Entity(tableName = "lancamentos")
 data class Lancamento(
     @PrimaryKey(autoGenerate = true)
-    val id: Long = 0,
-    val descricao: String,
-    val valor: BigDecimal,
-    val tipo: TipoLancamento,
-    val categoriaId: Long,
-    val dataHora: LocalDate
+    val id: Long = 0L, // <--- ADICIONE O VALOR PADRÃO AQUI
+    var descricao: String,
+    var valor: BigDecimal,
+    var tipo: TipoLancamento,
+    var categoriaId: Long,
+    var dataHora: LocalDate
 )
 
 /**

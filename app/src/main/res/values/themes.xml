@@ -8,18 +8,26 @@
             <item name="colorPrimary">@color/my_light_primary</item>
         -->
     </style>
+
+    <style name="App.BottomSheet.Modal" parent="Widget.Material3.BottomSheet.Modal">
+        <item name="android:windowSoftInputMode">adjustResize</item>
+    </style>
+
     <style name="Widget.App.Toolbar" parent="Widget.AppCompat.Toolbar">
         <item name="android:background">?attr/colorPrimary</item>
         <item name="android:theme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
         <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
     </style>
-
+    <style name="Theme.MeuOrcamento.BottomSheetDialog" parent="Theme.Material3.Light.BottomSheetDialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
 
     <!-- =================================================================================== -->
     <!--  Strings Globais do Aplicativo                                                      -->
     <!-- =================================================================================== -->
     <string name="app_name">Meu Orçamento</string>
-
 
     <!-- =================================================================================== -->
     <!--  Tela Principal (MainActivity)                                                      -->

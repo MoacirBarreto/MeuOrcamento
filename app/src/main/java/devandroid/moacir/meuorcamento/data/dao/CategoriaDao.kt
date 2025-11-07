@@ -16,9 +16,6 @@ interface CategoriaDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun inserirOuAtualizarCategorias(categorias: List<Categoria>)
 
-    @Update
-    suspend fun updateCategorias(categorias: List<Categoria>)
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun inserir(categoria: Categoria)
 
@@ -42,5 +39,14 @@ interface CategoriaDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(categorias: List<Categoria>)
+
+    @Update
+    suspend fun updateAll(categorias: List<Categoria>)
+
+    @Delete
+    suspend fun deleteAll(categorias: List<Categoria>)
+
+    @Update
+    suspend fun updateCategorias(categorias: List<Categoria>)
 }
 

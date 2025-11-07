@@ -13,7 +13,8 @@ class MeuOrcamentoRepository(
 ) {
     // --- Operações de Lançamento ---
 
-    val todosLancamentos: Flow<List<LancamentoComCategoria>> = lancamentoDao.LancamentosMaisCategoria()
+    val todosLancamentos: Flow<List<LancamentoComCategoria>> =
+        lancamentoDao.LancamentosMaisCategoria()
 
     // Função corrigida
     fun getTodosLancamentosSimples(): Flow<List<LancamentoComCategoria>> {
@@ -46,8 +47,8 @@ class MeuOrcamentoRepository(
         categoriaDao.inserir(categoria)
     }
 
-    suspend fun updateCategoria(categoria: List<Categoria>) {
-        categoriaDao.update(categoria)
+    suspend fun updateCategorias(categorias: List<Categoria>) {
+        categoriaDao.updateCategorias(categorias)
     }
 
     suspend fun deletarCategoria(categoria: Categoria) {

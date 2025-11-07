@@ -1,37 +1,136 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <!-- 1. Adicione a AppBarLayout e a Toolbar aqui -->
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        android:layout_height="wrap_content">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
+            style="@style/Widget.App.Toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="@string/app_name"
-            style="@style/Widget.App.Toolbar"/>
+            app:title="@string/app_name" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- 2. Ajuste o RecyclerView para ficar abaixo da AppBar -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewLancamentos"
+    <!-- Otimização: Usar ConstraintLayout para organizar o conteúdo principal -->
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="8dp"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:listitem="@layout/item_lancamento" />
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-    <!-- Seu FloatingActionButton permanece igual -->
+        <!-- Painel de Resumo (Receitas, Despesas, Saldo) -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_summary"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:cardElevation="4dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp">
+
+                <!-- Coluna Receitas -->
+                <TextView
+                    android:id="@+id/label_receitas"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/main_label_total_receitas"
+                    android:textAppearance="?attr/textAppearanceLabelMedium"
+                    app:layout_constraintEnd_toStartOf="@id/label_despesas"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvTotalReceitas"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="@color/receita_color"
+                    app:layout_constraintEnd_toEndOf="@id/label_receitas"
+                    app:layout_constraintStart_toStartOf="@id/label_receitas"
+                    app:layout_constraintTop_toBottomOf="@id/label_receitas"
+                    tools:text="R$ 1.250,50" />
+
+                <!-- Coluna Despesas -->
+                <TextView
+                    android:id="@+id/label_despesas"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/main_label_total_despesas"
+                    android:textAppearance="?attr/textAppearanceLabelMedium"
+                    app:layout_constraintEnd_toStartOf="@id/label_saldo"
+                    app:layout_constraintStart_toEndOf="@id/label_receitas"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvTotalDespesas"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="@color/despesa_color"
+                    app:layout_constraintEnd_toEndOf="@id/label_despesas"
+                    app:layout_constraintStart_toStartOf="@id/label_despesas"
+                    app:layout_constraintTop_toBottomOf="@id/label_despesas"
+                    tools:text="R$ 830,00" />
+
+                <!-- Coluna Saldo -->
+                <TextView
+                    android:id="@+id/label_saldo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/main_label_saldo"
+                    android:textAppearance="?attr/textAppearanceLabelMedium"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/label_despesas"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvSaldoValor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="?android:attr/textColorPrimary"
+                    app:layout_constraintEnd_toEndOf="@id/label_saldo"
+                    app:layout_constraintStart_toStartOf="@id/label_saldo"
+                    app:layout_constraintTop_toBottomOf="@id/label_saldo"
+                    tools:text="R$ 420,50" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Lista de Lançamentos -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewLancamentos"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:clipToPadding="false"
+            android:paddingBottom="80dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/card_summary"
+            tools:listitem="@layout/item_lancamento" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- FloatingActionButton para adicionar lançamentos -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAdicionarLancamento"
         android:layout_width="wrap_content"

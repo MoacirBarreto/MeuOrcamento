@@ -6,7 +6,6 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.ui.semantics.dismiss
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -24,13 +23,15 @@ import devandroid.moacir.meuorcamento.ui.viewmodel.MainViewModel
 import devandroid.moacir.meuorcamento.ui.viewmodel.MainViewModelFactory
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
     private val mainViewModel: MainViewModel by viewModels {
-        val database = AppDatabase.getDatabase(applicationContext)
+        val database = AppDatabase.getDatabase(this)
         val repository = MeuOrcamentoRepository(database.lancamentoDao(), database.categoriaDao())
         MainViewModelFactory(repository)
     }
@@ -39,18 +40,21 @@ class MainActivity : AppCompatActivity() {
         LancamentoAdapter(
             context = this,
             onClick = { lancamentoComCategoria ->
-                // Acessa a propriedade 'lancamento' para passar ao BottomSheet para edição
                 abrirBottomSheet(lancamentoComCategoria.lancamento)
             },
             onLongClick = { lancamentoComCategoria ->
-                // Extrai o objeto 'lancamento' para o diálogo de exclusão
                 mostrarDialogoDeExclusao(lancamentoComCategoria.lancamento)
             }
         )
     }
 
-    // Propriedade para manter a lista de categorias sempre atualizada,
-    // garantindo que o BottomSheet sempre tenha os dados mais recentes.
+    // Otimização: Formatador de moeda para ser reutilizado.
+    // Locale("pt", "BR") garante o formato R$ 1.234,56
+    private val formatadorDeMoeda: NumberFormat by lazy {
+        NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
+    }
+
+    // Propriedade para manter a lista de categorias sempre atualizada
     private var listaDeCategoriasAtual: List<Categoria> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,9 +66,6 @@ class MainActivity : AppCompatActivity() {
         observarDados()
     }
 
-    /**
-     * Otimização: Agrupa todas as configurações de UI em um único método para maior clareza.
-     */
     private fun configurarUI() {
         setSupportActionBar(binding.toolbar)
         configurarRecyclerView()
@@ -79,12 +80,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Otimização: Usar 'return when' deixa o código mais conciso.
         return when (item.itemId) {
             R.id.action_edit_categorias -> {
                 startActivity(Intent(this, CategoriasActivity::class.java))
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -93,23 +94,19 @@ class MainActivity : AppCompatActivity() {
 
     private fun configurarRecyclerView() {
         binding.recyclerViewLancamentos.apply {
-            // Otimização: 'apply' é usado para configurar múltiplas propriedades do mesmo objeto.
             layoutManager = LinearLayoutManager(this@MainActivity)
-            adapter = lancamentoAdapter // Usa o adapter inicializado via 'lazy'
+            adapter = lancamentoAdapter
         }
     }
 
     private fun configurarFab() {
         binding.fabAdicionarLancamento.setOnClickListener {
-            // Ao adicionar um novo lançamento, não passamos um 'lancamento',
-            // e a lista de categorias já está disponível na propriedade da Activity.
             abrirBottomSheet()
         }
     }
 
     /**
-     * Otimização: Nome do método mais descritivo.
-     * Mostra um diálogo de confirmação antes de excluir um lançamento.
+     * Mostra um diálogo de confirmação para excluir um lançamento.
      */
     private fun mostrarDialogoDeExclusao(lancamento: Lancamento) {
         MaterialAlertDialogBuilder(this)
@@ -118,30 +115,47 @@ class MainActivity : AppCompatActivity() {
             .setNegativeButton(R.string.cancelar) { dialog, _ ->
                 dialog.dismiss()
             }
-            .setPositiveButton(R.string.excluir) { dialog, _ ->
+            .setPositiveButton(R.string.excluir) { _, _ ->
                 mainViewModel.excluirLancamento(lancamento)
-                dialog.dismiss()
             }
             .show()
     }
 
     /**
      * Centraliza a observação dos fluxos de dados do ViewModel.
-     * Garante que a coleta só aconteça quando a UI estiver visível (STARTED).
+     * Otimização: Coleta múltiplos flows dentro de um único repeatOnLifecycle.
      */
     private fun observarDados() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Observa o fluxo de lançamentos com categoria e atualiza o adapter.
+                // Coleta o fluxo de lançamentos
                 launch {
                     mainViewModel.todosLancamentos.collectLatest(lancamentoAdapter::submitList)
                 }
 
-                // Observa o fluxo de categorias e atualiza a propriedade local.
-                // Esta é a chave para manter a lista sempre sincronizada para o BottomSheet.
+                // Coleta o fluxo de categorias
                 launch {
                     mainViewModel.todasCategorias.collect { categorias ->
                         listaDeCategoriasAtual = categorias
+                    }
+                }
+
+                // Otimização: Novo coletor para os totais
+                // Coleta os totais de receitas e despesas
+                launch {
+                    mainViewModel.totais.collect { totais ->
+                        binding.tvTotalReceitas.text =
+                            formatadorDeMoeda.format(totais.totalReceitas)
+                        binding.tvTotalDespesas.text =
+                            formatadorDeMoeda.format(totais.totalDespesas.abs())
+                    }
+                }
+
+                // Otimização: Novo coletor para o saldo total
+                // Coleta o saldo total
+                launch {
+                    mainViewModel.saldoTotal.collect { saldo ->
+                        binding.tvSaldoValor.text = formatadorDeMoeda.format(saldo)
                     }
                 }
             }
@@ -150,13 +164,12 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Abre o BottomSheet para adicionar ou editar um lançamento.
-     * Usa a `listaDeCategoriasAtual`, que está sempre sincronizada com o BD.
      */
     private fun abrirBottomSheet(lancamento: Lancamento? = null) {
         AddLancamentoBottomSheet(
             lancamentoParaEditar = lancamento,
-            categorias = this.listaDeCategoriasAtual, // Sempre usa a lista mais recente
-            onSave = mainViewModel::salvarLancamento // Otimização: Referência de função
+            categorias = this.listaDeCategoriasAtual,
+            onSave = mainViewModel::salvarLancamento
         ).show(supportFragmentManager, AddLancamentoBottomSheet.TAG)
     }
 }

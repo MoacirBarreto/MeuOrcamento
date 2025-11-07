@@ -1,4 +1,6 @@
 <resources>
+    <string name="default_receita_description">Receita</string>
+    <string name="add_lancamento_error_categoria_vazia">Selecione uma categoria</string>
 
     <string name="novo_lancamento">Novo Lançamento</string>
     <string name="descricao">Descrição</string>
