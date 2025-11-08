@@ -6,6 +6,7 @@ import devandroid.moacir.meuorcamento.data.model.Categoria
 import devandroid.moacir.meuorcamento.data.model.Lancamento
 import devandroid.moacir.meuorcamento.data.model.LancamentoComCategoria
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDate
 
 class MeuOrcamentoRepository(
     private val lancamentoDao: LancamentoDao,
@@ -66,5 +67,9 @@ class MeuOrcamentoRepository(
     suspend fun atualizarCategorias(categorias: List<Categoria>) {
         // Esta função parece duplicada, você pode querer usar salvarCategorias
         categoriaDao.inserirOuAtualizarCategorias(categorias)
+    }
+
+    fun getLancamentosEntreDatas(dataInicio: LocalDate, dataFim: LocalDate): Flow<List<Lancamento>> {
+        return lancamentoDao.getLancamentosEntreDatas(dataInicio, dataFim)
     }
 }

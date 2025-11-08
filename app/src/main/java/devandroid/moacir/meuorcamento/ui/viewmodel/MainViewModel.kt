@@ -8,12 +8,15 @@ import devandroid.moacir.meuorcamento.data.model.Lancamento
 import devandroid.moacir.meuorcamento.data.model.TipoLancamento
 import devandroid.moacir.meuorcamento.data.repository.MeuOrcamentoRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
+import kotlinx.coroutines.flow.map
+import java.time.LocalDate
 
 /**
  * Classe de dados para agrupar os totais de forma coesa.
@@ -68,6 +71,10 @@ class MainViewModel(private val repository: MeuOrcamentoRepository) : ViewModel(
             initialValue = BigDecimal.ZERO
         )
 
+
+    fun getLancamentosPorPeriodo(dataInicio: LocalDate, dataFim: LocalDate): Flow<List<Lancamento>> {
+        return repository.getLancamentosEntreDatas(dataInicio, dataFim)
+    }
     /**
      * Salva um lançamento (novo ou editado).
      * Otimização: Especifica o Dispatchers.IO para operações de escrita no banco de dados.

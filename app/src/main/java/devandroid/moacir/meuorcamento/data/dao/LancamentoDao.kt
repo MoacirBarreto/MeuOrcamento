@@ -10,11 +10,15 @@ import devandroid.moacir.meuorcamento.data.model.Lancamento
 import kotlinx.coroutines.flow.Flow
 import androidx.room.Transaction
 import devandroid.moacir.meuorcamento.data.model.LancamentoComCategoria
+import java.time.LocalDate
 
 
 @Dao
 interface LancamentoDao {
-     /**
+
+    @Query("SELECT * FROM lancamentos WHERE dataHora BETWEEN :dataInicio AND :dataFim ORDER BY dataHora DESC")
+    fun getLancamentosEntreDatas(dataInicio: LocalDate, dataFim: LocalDate): Flow<List<Lancamento>>
+    /**
      * Insere um novo lançamento no banco de dados.
      */
     @Insert(onConflict = OnConflictStrategy.REPLACE)

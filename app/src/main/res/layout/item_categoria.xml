@@ -6,4 +6,5 @@
     android:layout_height="wrap_content"
     android:padding="16dp"
     android:textAppearance="?attr/textAppearanceListItem"
-    tools:text="Alimentação" />
+    tools:text="Alimentação"
+    />

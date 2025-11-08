@@ -1,17 +1,7 @@
 <resources>
     <string name="default_receita_description">Receita</string>
     <string name="add_lancamento_error_categoria_vazia">Selecione uma categoria</string>
-
-    <string name="novo_lancamento">Novo Lançamento</string>
-    <string name="descricao">Descrição</string>
-    <string name="valor">Valor</string>
-    <string name="receita">Receita</string>
-    <string name="salvar_lancamento">Salvar Lançamento</string>
-    <string name="despesa">Despesa</string>
-    <string name="data_do_lancamento">Data do Lançamento</string>
-    <string name="adicionar_nova_categoria">Adicionar nova categoria</string>
     <string name="nome_da_categoria">Nome da Categoria</string>
-    <string name="gerenciar_categorias">Gerenciar Categorias</string>
     <string name="adicionar_novo_lancamento">Adicionar novo lançamento</string>
     <string name="descricao_add">Descrição do Lançamento</string>
     <string name="adicionar_lancamento_titulo">Adicionar Lançamento</string>
@@ -22,7 +12,6 @@
     <string name="action_update">Atualizar</string>
     <string name="data_e_hora">Data do lançamento</string>
     <string name="salvar">Salvar</string>
-    <string name="categoria_hint">Categoria do Lançamento</string>
     <string name="edit_your_expense_categories">Edite suas categorias</string>
     <string name="category_1_hint">Categoria 1</string>
     <string name="category_2_hint">Categoria 2</string>
@@ -30,9 +19,18 @@
     <string name="category_4_hint">Categoria 4</string>
     <string name="category_5_hint">Categoria 5</string>
     <string name="save_changes">Salvar alterações</string>
-    <string name="editar_categorias">Editar Categorias</string>
     <string name="confirmar_exclusao_titulo">Confirmar Exclusão</string>
     <string name="confirmar_exclusao_mensagem">Tem certeza de que deseja excluir o lançamento \"%1$s\"? Esta ação não pode ser desfeita.</string>
     <string name="cancelar">Cancelar</string>
     <string name="excluir">Excluir</string>
+    <string name="este_ano_at_hoje">Este Ano (até hoje)</string>
+    <string name="mes_corrente">Mês Corrente</string>
+    <string name="app_name">Meu Orçamento</string>
+    <string name="main_label_total_receitas">Receitas</string>
+    <string name="main_label_total_despesas">Despesas</string>
+    <string name="main_label_saldo">Saldo</string>
+    <string name="add_lancamento_label_categoria">Categoria</string>
+    <string name="add_lancamento_error_valor_invalido">Por favor, insira um valor válido.</string>
+    <string name="add_lancamento_error_descricao_vazia">A descrição não pode ficar em branco.</string>
+
 </resources>

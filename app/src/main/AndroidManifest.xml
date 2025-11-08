@@ -13,6 +13,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MeuOrcamento">
         <activity
+            android:name=".ui.TotalizadoresActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

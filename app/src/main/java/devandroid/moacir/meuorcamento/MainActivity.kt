@@ -2,8 +2,10 @@ package devandroid.moacir.meuorcamento
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
@@ -17,6 +19,7 @@ import devandroid.moacir.meuorcamento.data.model.Lancamento
 import devandroid.moacir.meuorcamento.data.repository.MeuOrcamentoRepository
 import devandroid.moacir.meuorcamento.databinding.ActivityMainBinding
 import devandroid.moacir.meuorcamento.ui.CategoriasActivity
+import devandroid.moacir.meuorcamento.ui.TotalizadoresActivity
 import devandroid.moacir.meuorcamento.ui.adapter.LancamentoAdapter
 import devandroid.moacir.meuorcamento.ui.dialog.AddLancamentoBottomSheet
 import devandroid.moacir.meuorcamento.ui.viewmodel.MainViewModel
@@ -48,13 +51,10 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    // Otimização: Formatador de moeda para ser reutilizado.
-    // Locale("pt", "BR") garante o formato R$ 1.234,56
     private val formatadorDeMoeda: NumberFormat by lazy {
         NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
     }
 
-    // Propriedade para manter a lista de categorias sempre atualizada
     private var listaDeCategoriasAtual: List<Categoria> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,35 +62,51 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Configura a Toolbar como a ActionBar da atividade. Essencial para o menu funcionar.
+        setSupportActionBar(binding.toolbar)
+
         configurarUI()
         observarDados()
-    }
-
-    private fun configurarUI() {
-        setSupportActionBar(binding.toolbar)
-        configurarRecyclerView()
-        configurarFab()
     }
 
     // --- Configuração do Menu da Toolbar ---
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Infla o menu definido no XML na toolbar.
         menuInflater.inflate(R.menu.main_menu, menu)
-        return true
+        return true // Retorna true para o menu ser exibido.
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Trata os cliques nos itens do menu.
+        Log.d("MENU_CLICK", "Item clicado: ${item.title}")
         return when (item.itemId) {
-            R.id.action_edit_categorias -> {
+            R.id.menu_totalizadores -> {
+                startActivity(Intent(this, TotalizadoresActivity::class.java))
+                true // Indica que o clique foi tratado.
+            }
+
+            R.id.menu_config_categorias -> {
                 startActivity(Intent(this, CategoriasActivity::class.java))
                 true
             }
 
+            R.id.menu_ajuda -> {
+                Toast.makeText(this, "Ação de Ajuda Clicada!", Toast.LENGTH_SHORT).show()
+                // TODO: Implementar a tela de Ajuda.
+                true
+            }
+            // Se o item não for um dos nossos, deixa o sistema tratar.
             else -> super.onOptionsItemSelected(item)
         }
     }
 
     // --- Configurações dos Componentes da UI ---
+
+    private fun configurarUI() {
+        configurarRecyclerView()
+        configurarFab()
+    }
 
     private fun configurarRecyclerView() {
         binding.recyclerViewLancamentos.apply {
@@ -110,38 +126,37 @@ class MainActivity : AppCompatActivity() {
      */
     private fun mostrarDialogoDeExclusao(lancamento: Lancamento) {
         MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.confirmar_exclusao_titulo)
+            .setTitle(getString(R.string.confirmar_exclusao_titulo))
             .setMessage(getString(R.string.confirmar_exclusao_mensagem, lancamento.descricao))
-            .setNegativeButton(R.string.cancelar) { dialog, _ ->
+            .setNegativeButton(getString(R.string.cancelar)) { dialog, _ ->
                 dialog.dismiss()
             }
-            .setPositiveButton(R.string.excluir) { _, _ ->
+            .setPositiveButton(getString(R.string.excluir)) { _, _ ->
                 mainViewModel.excluirLancamento(lancamento)
             }
             .show()
     }
 
     /**
-     * Centraliza a observação dos fluxos de dados do ViewModel.
-     * Otimização: Coleta múltiplos flows dentro de um único repeatOnLifecycle.
+     * Centraliza a observação dos fluxos de dados do ViewModel usando corrotinas.
      */
     private fun observarDados() {
         lifecycleScope.launch {
+            // Garante que a coleta de dados só aconteça quando a Activity estiver ativa.
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Coleta o fluxo de lançamentos
+                // Coleta o fluxo de lançamentos.
                 launch {
                     mainViewModel.todosLancamentos.collectLatest(lancamentoAdapter::submitList)
                 }
 
-                // Coleta o fluxo de categorias
+                // Coleta o fluxo de categorias.
                 launch {
                     mainViewModel.todasCategorias.collect { categorias ->
                         listaDeCategoriasAtual = categorias
                     }
                 }
 
-                // Otimização: Novo coletor para os totais
-                // Coleta os totais de receitas e despesas
+                // Coleta os totais de receitas e despesas.
                 launch {
                     mainViewModel.totais.collect { totais ->
                         binding.tvTotalReceitas.text =
@@ -151,8 +166,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-                // Otimização: Novo coletor para o saldo total
-                // Coleta o saldo total
+                // Coleta o saldo total.
                 launch {
                     mainViewModel.saldoTotal.collect { saldo ->
                         binding.tvSaldoValor.text = formatadorDeMoeda.format(saldo)

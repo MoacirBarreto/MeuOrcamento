@@ -48,6 +48,12 @@ class CategoriasActivity : AppCompatActivity() {
 
         // Configura o listener do botão de salvar
         configurarBotaoSalvar()
+        configurarToolbar()
+    }
+    private fun configurarToolbar() {
+        binding.toolbarCat.setNavigationOnClickListener {
+            finish()
+        }
     }
 
     private fun inicializarMapaDeViews() {
