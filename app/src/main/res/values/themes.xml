@@ -1,22 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Tema base da aplicação -->
+
     <style name="Theme.MeuOrcamento" parent="Theme.Material3.DayNight.NoActionBar">
-        <!--
-            Personalize seu tema aqui.
-            Por exemplo, você pode definir as cores primárias, secundárias, etc.
-            <item name="colorPrimary">@color/my_light_primary</item>
-        -->
+
     </style>
-    <!-- 1. Estilo para o botão de Overflow que define o ícone desejado -->
 
     <style name="Widget.App.Toolbar.Overflow" parent="Widget.AppCompat.ActionButton.Overflow">
-        <!-- Você pode adicionar propriedades aqui para customizar, se necessário -->
-        <!-- Por exemplo, para mudar a cor do ícone de três pontos (overflow) -->
-        <!-- <item name="android:tint">@color/white</item> -->
-    </style>
 
-    <!-- 2. Tema de SOBREPOSIÇÃO (Overlay) que usa o estilo do botão acima -->
+    </style>
 
     <style name="App.BottomSheet.Modal" parent="Widget.Material3.BottomSheet.Modal">
         <item name="android:windowSoftInputMode">adjustResize</item>
