@@ -7,6 +7,7 @@
     android:orientation="vertical"
     tools:context=".ui.TotalizadoresActivity">
 
+    <!-- Toolbar Padrão -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -17,7 +18,6 @@
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="@drawable/ic_arrow_back"
             app:title="Totalizadores" />
-
     </com.google.android.material.appbar.AppBarLayout>
 
     <ScrollView
@@ -30,155 +30,200 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Card para o Mês Corrente -->
+            <!-- CARD ÚNICO: ANÁLISE DE DADOS -->
             <com.google.android.material.card.MaterialCardView
+                style="?attr/materialCardViewFilledStyle"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardElevation="4dp">
+                android:layout_height="wrap_content">
 
                 <LinearLayout
+                    android:id="@+id/container_analise"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="16dp">
 
+                    <!-- TÍTULO DA SEÇÃO -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/mes_corrente"
+                        android:text="Análise de Dados"
                         android:textAppearance="?attr/textAppearanceTitleMedium" />
 
-                    <TextView
-                        android:id="@+id/tv_mes_receitas"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:textColor="@color/verde_receita"
-                        tools:text="Receitas: R$ 5.000,00" />
-
-                    <TextView
-                        android:id="@+id/tv_mes_despesas"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/vermelho_despesa"
-                        tools:text="Despesas: R$ 3.500,00" />
-
-                    <TextView
-                        android:id="@+id/tv_mes_saldo"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:textAppearance="?attr/textAppearanceBodyLarge"
-                        tools:text="Saldo: R$ 1.500,00" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Card para o Ano Corrente -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardElevation="4dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/este_ano_at_hoje"
-                        android:textAppearance="?attr/textAppearanceTitleMedium" />
-
-                    <TextView
-                        android:id="@+id/tv_ano_receitas"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:textColor="@color/verde_receita"
-                        tools:text="Receitas: R$ 60.000,00" />
-
-                    <TextView
-                        android:id="@+id/tv_ano_despesas"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/vermelho_despesa"
-                        tools:text="Despesas: R$ 45.000,00" />
-
-                    <TextView
-                        android:id="@+id/tv_ano_saldo"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:textAppearance="?attr/textAppearanceBodyLarge"
-                        tools:text="Saldo: R$ 15.000,00" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Card para Período Personalizado -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardElevation="4dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Período Personalizado"
-                        android:textAppearance="?attr/textAppearanceTitleMedium" />
-
-                    <LinearLayout
+                    <!-- OPÇÕES DE PERÍODO (RADIO GROUP) -->
+                    <RadioGroup
+                        android:id="@+id/rg_periodo"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:gravity="center_vertical"
+                        android:layout_marginTop="16dp"
                         android:orientation="horizontal">
 
-                        <Button
-                            android:id="@+id/btn_selecionar_periodo"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
+                        <RadioButton
+                            android:id="@+id/rb_mes_corrente"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Selecionar Período" />
+                            android:text="Mês" />
+
+                        <RadioButton
+                            android:id="@+id/rb_ano_corrente"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Ano" />
+
+                        <RadioButton
+                            android:id="@+id/rb_personalizado"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Período" />
+                    </RadioGroup>
+
+                    <!-- BOTÃO PARA SELECIONAR PERÍODO (só aparece na 3ª opção) -->
+                    <Button
+                        android:id="@+id/btn_selecionar_periodo"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Selecionar Período"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                    <!-- Divisor -->
+                    <com.google.android.material.divider.MaterialDivider
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp" />
+
+                    <!-- SEÇÃO DE TOTAIS -->
+                    <TextView
+                        android:id="@+id/tv_periodo_selecionado"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:gravity="center_horizontal"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        tools:text="01/11/2025 - 08/11/2025" />
+
+                    <!-- Layout Horizontal para Receitas e Despesas -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:orientation="horizontal">
+
+                        <!-- Card Sutil para Receitas -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:background="@drawable/background_receita_subtle"
+                            android:padding="8dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Receitas"
+                                android:textAppearance="?attr/textAppearanceBodyMedium"/>
+
+                            <TextView
+                                android:id="@+id/tv_periodo_receitas"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:textAppearance="?attr/textAppearanceTitleSmall"
+                                android:textColor="@color/app_verde_receita"
+                                android:textStyle="bold"
+                                tools:text="R$ 5.000,00" />
+                        </LinearLayout>
+
+                        <Space
+                            android:layout_width="16dp"
+                            android:layout_height="match_parent"/>
+
+                        <!-- Card Sutil para Despesas -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:background="@drawable/background_despesa_subtle"
+                            android:padding="8dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Despesas"
+                                android:textAppearance="?attr/textAppearanceBodyMedium"/>
+
+                            <TextView
+                                android:id="@+id/tv_periodo_despesas"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:textAppearance="?attr/textAppearanceTitleSmall"
+                                android:textColor="@color/app_vermelho_despesa"
+                                android:textStyle="bold"
+                                tools:text="R$ 3.500,00" />
+                        </LinearLayout>
 
                     </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/tv_periodo_receitas"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:textColor="@color/verde_receita"
-                        tools:text="Receitas: R$ 0,00" />
-
-                    <TextView
-                        android:id="@+id/tv_periodo_despesas"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/vermelho_despesa"
-                        tools:text="Despesas: R$ 0,00" />
-
+                    <!-- Saldo com mais destaque -->
                     <TextView
                         android:id="@+id/tv_periodo_saldo"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:textAppearance="?attr/textAppearanceBodyLarge"
-                        tools:text="Saldo: R$ 0,00" />
+                        android:layout_marginTop="16dp"
+                        android:gravity="center_horizontal"
+                        android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                        android:textStyle="bold"
+                        tools:text="Saldo: R$ 1.500,00" />
+
+
+                    <!-- Divisor -->
+                    <com.google.android.material.divider.MaterialDivider
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- SEÇÃO DE GRÁFICOS -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="Receitas vs. Despesas"
+                        android:textAppearance="?attr/textAppearanceTitleMedium" />
+
+                    <com.github.mikephil.charting.charts.BarChart
+                        android:id="@+id/barChartReceitasDespesas"
+                        android:layout_width="match_parent"
+                        android:layout_height="250dp"
+                        android:layout_marginTop="8dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:gravity="center"
+                        android:text="Composição das Despesas"
+                        android:textAppearance="?attr/textAppearanceTitleMedium" />
+
+                    <com.github.mikephil.charting.charts.PieChart
+                        android:id="@+id/pieChartComposicaoDespesas"
+                        android:layout_width="match_parent"
+                        android:layout_height="250dp"
+                        android:layout_marginTop="8dp" />
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
     </ScrollView>
-
 </LinearLayout>

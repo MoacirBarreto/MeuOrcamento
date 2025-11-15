@@ -17,6 +17,13 @@ class MeuOrcamentoRepository(
     val todosLancamentos: Flow<List<LancamentoComCategoria>> =
         lancamentoDao.LancamentosMaisCategoria()
 
+    fun getLancamentosComCategoriaPorPeriodo(
+        dataInicio: LocalDate,
+        dataFim: LocalDate
+    ): Flow<List<LancamentoComCategoria>> {
+        return lancamentoDao.getLancamentosComCategoriaPorPeriodo(dataInicio, dataFim)
+    }
+
     // Função corrigida
     fun getTodosLancamentosSimples(): Flow<List<LancamentoComCategoria>> {
         return lancamentoDao.LancamentosMaisCategoria()
@@ -69,7 +76,10 @@ class MeuOrcamentoRepository(
         categoriaDao.inserirOuAtualizarCategorias(categorias)
     }
 
-    fun getLancamentosEntreDatas(dataInicio: LocalDate, dataFim: LocalDate): Flow<List<Lancamento>> {
+    fun getLancamentosEntreDatas(
+        dataInicio: LocalDate,
+        dataFim: LocalDate
+    ): Flow<List<Lancamento>> {
         return lancamentoDao.getLancamentosEntreDatas(dataInicio, dataFim)
     }
 }

@@ -63,7 +63,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:textAppearance="?attr/textAppearanceTitleMedium"
-                    android:textColor="@color/receita_color"
+
                     app:layout_constraintEnd_toEndOf="@id/label_receitas"
                     app:layout_constraintStart_toStartOf="@id/label_receitas"
                     app:layout_constraintTop_toBottomOf="@id/label_receitas"
@@ -86,7 +86,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:textAppearance="?attr/textAppearanceTitleMedium"
-                    android:textColor="@color/despesa_color"
+                    android:textColor="@color/app_vermelho_despesa"
                     app:layout_constraintEnd_toEndOf="@id/label_despesas"
                     app:layout_constraintStart_toStartOf="@id/label_despesas"
                     app:layout_constraintTop_toBottomOf="@id/label_despesas"

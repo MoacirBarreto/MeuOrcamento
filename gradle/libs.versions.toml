@@ -1,42 +1,44 @@
 [versions]
-agp = "8.11.2"
-kotlin = "2.0.0"
-coreKtx = "1.17.0"
-junit = "4.13.2"
+agp = "8.4.2"
+kotlin = "1.9.22"
+coreKtx = "1.12.0"
 junitVersion = "1.3.0"
-espressoCore = "3.7.0"
-appcompat = "1.7.1"
-material = "1.13.0"
-activity = "1.11.0"
-constraintlayout = "2.2.1"
-ksp = "2.0.0-1.0.21"
-room = "2.8.3"
+appcompat = "1.6.1"
+material = "1.11.0"
+constraintlayout = "2.1.4"
+ksp = "1.9.22-1.0.17"
 gson = "2.13.2"
-animatedVectorDrawable = "28.0.0"
 lifecycle = "2.9.4"
 uiAndroid = "1.9.4"
+lifecycleLivedataKtx = "2.7.0"
+lifecycleViewmodelKtx = "2.7.0"
+activity = "1.8.2"
+fragment = "1.6.2"
+room = "2.6.1"
+junit = "4.13.2"
+androidxJunit = "1.1.5"
+espressoCore = "3.5.1"
 
 [libraries]
-androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
-androidx-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycle" }
+google-code-gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+androidx-ui-android = { group = "androidx.compose.ui", name = "ui-android", version.ref = "uiAndroid" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
-androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxJunit" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
-androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+androidx-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycleLivedataKtx" }
+androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
+androidx-fragment = { group = "androidx.fragment", name = "fragment", version.ref = "fragment" }
 
-androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
-androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
-androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
-google-code-gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
-androidx-vectordrawable-animated = { group = "androidx.vectordrawable", name = "vectordrawable-animated", version = "1.2.0" }
-androidx-ui-android = { group = "androidx.compose.ui", name = "ui-android", version.ref = "uiAndroid" }
-
-
+# Room
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

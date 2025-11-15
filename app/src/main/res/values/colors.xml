@@ -1,13 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="purple_500">#6200EE</color>
-    <color name="receita">#008000</color> <!-- Verde -->
-    <color name="despesa">#FF0000</color> <!-- Um tom de roxo/azul para a barra -->
-    <color name="verde_receita">#008000</color> <!-- Verde escuro para boa legibilidade -->
-    <color name="vermelho_despesa">#B30000</color>
-    <color name="receita_color">#4CAF50</color> <!-- Example: Green -->
-    <color name="despesa_color">#F44336</color>
+    <!--
+    ================================================
+    PALETA DE CORES SEMÂNTICA DO APLICATIVO
+    Cores que representam conceitos do app, não o tema.
+    ================================================
+    -->
+    <color name="app_verde_receita">#008000</color>
+    <color name="app_vermelho_despesa">#B30000</color>
 
+    <!--
+    ================================================
+    PALETA DE CORES PARA TEMA CLARO (LIGHT MODE)
+    Baseada no Material Design 3
+    ================================================
+    -->
+    <!-- Cores Primárias (Azul) -->
+    <color name="app_light_primary">#0061A4</color>
+    <!-- Cor de destaque principal -->
+    <color name="app_light_onPrimary">#FFFFFF</color>
+    <!-- Cor do texto/ícones sobre a primária -->
+    <color name="app_light_primaryContainer">#D1E4FF</color>
+    <!-- Contêiner destacado -->
+    <color name="app_light_onPrimaryContainer">#001D36</color>
+    <!-- Texto sobre o contêiner -->
+    <!-- Cores Secundárias (Cinza azulado) -->
+    <color name="app_light_secondary">#535F70</color>
+    <color name="app_light_onSecondary">#FFFFFF</color>
+    <color name="app_light_secondaryContainer">#D7E3F7</color>
+    <color name="app_light_onSecondaryContainer">#101C2B</color>
+
+    <!-- Cores de Superfície e Fundo -->
+    <color name="app_light_background">#F8F9FF</color>
+    <!-- Fundo principal da tela (um branco levemente azulado) -->
+    <color name="app_light_onBackground">#191C20</color>
+    <!-- Texto principal sobre o fundo -->
+    <color name="app_light_surface">#F8F9FF</color>
+    <!-- Fundo de cards, menus, etc. -->
+    <color name="app_light_onSurface">#191C20</color>
+    <!-- Texto sobre superfícies -->
+    <color name="app_light_surfaceVariant">#DFE2EB</color>
+    <!-- Variante para diferenciação (ex: campos de texto) -->
+    <color name="app_light_onSurfaceVariant">#42474E</color>
+    <!-- Texto sobre a superfície variante -->
+    <color name="app_light_outline">#73777F</color>
+    <!-- Bordas e divisores -->
+
+    <!-- Cores de Erro -->
+    <color name="app_light_error">#BA1A1A</color>
+    <color name="app_light_onError">#FFFFFF</color>
+    <color name="app_light_errorContainer">#FFDAD6</color>
+    <color name="app_light_onErrorContainer">#410002</color>
 </resources>

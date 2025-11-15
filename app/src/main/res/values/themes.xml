@@ -1,36 +1,32 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Tema base da aplicação -->
+    <!-- Tema Base do App (Modo Claro) -->
     <style name="Theme.MeuOrcamento" parent="Theme.Material3.DayNight.NoActionBar">
-        <!--
-            Personalize seu tema aqui.
-            Por exemplo, você pode definir as cores primárias, secundárias, etc.
-            <item name="colorPrimary">@color/my_light_primary</item>
-        -->
-    </style>
-    <!-- 1. Estilo para o botão de Overflow que define o ícone desejado -->
 
-    <style name="Widget.App.Toolbar.Overflow" parent="Widget.AppCompat.ActionButton.Overflow">
-        <!-- Você pode adicionar propriedades aqui para customizar, se necessário -->
-        <!-- Por exemplo, para mudar a cor do ícone de três pontos (overflow) -->
-        <!-- <item name="android:tint">@color/white</item> -->
-    </style>
+        <!-- Cores Primárias -->
+        <item name="colorPrimary">@color/app_light_primary</item>
+        <item name="colorOnPrimary">@color/app_light_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/app_light_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/app_light_onPrimaryContainer</item>
 
-    <!-- 2. Tema de SOBREPOSIÇÃO (Overlay) que usa o estilo do botão acima -->
+        <!-- Cores Secundárias -->
+        <item name="colorSecondary">@color/app_light_secondary</item>
+        <item name="colorOnSecondary">@color/app_light_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/app_light_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/app_light_onSecondaryContainer</item>
 
-    <style name="App.BottomSheet.Modal" parent="Widget.Material3.BottomSheet.Modal">
-        <item name="android:windowSoftInputMode">adjustResize</item>
-    </style>
+        <!-- Cores de Fundo e Superfície -->
+        <item name="android:colorBackground">@color/app_light_background</item>
+        <item name="colorOnBackground">@color/app_light_onBackground</item>
+        <item name="colorSurface">@color/app_light_surface</item>
+        <item name="colorOnSurface">@color/app_light_onSurface</item>
+        <item name="colorSurfaceVariant">@color/app_light_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/app_light_onSurfaceVariant</item>
 
-    <style name="Widget.App.Toolbar" parent="Widget.AppCompat.Toolbar">
-        <item name="android:background">?attr/colorPrimary</item>
-        <item name="android:theme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
-        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
-    </style>
-
-    <style name="Theme.MeuOrcamento.BottomSheetDialog" parent="Theme.Material3.Light.BottomSheetDialog">
-        <item name="android:windowIsFloating">false</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:backgroundDimEnabled">false</item>
+        <!-- Outras cores -->
+        <item name="colorError">@color/app_light_error</item>
+        <item name="colorOnError">@color/app_light_onError</item>
+        <item name="colorErrorContainer">@color/app_light_errorContainer</item>
+        <item name="colorOnErrorContainer">@color/app_light_onErrorContainer</item>
+        <item name="colorOutline">@color/app_light_outline</item>
     </style>
 </resources>

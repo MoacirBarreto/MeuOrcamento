@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <resources>
+        <!--
+        ================================================
+        PALETA DE CORES PARA TEMA ESCURO (DARK MODE)
+        ================================================
+        -->
+        <!-- Cores Primárias (Azul) -->
+        <color name="dark_primary">#9DCAFF</color>
+        <color name="dark_onPrimary">#003258</color>
+        <color name="dark_primaryContainer">#00497D</color>
+        <color name="dark_onPrimaryContainer">#D1E4FF</color>
+
+        <!-- Cores Secundárias (Cinza azulado) -->
+        <color name="dark_secondary">#BCC8DB</color>
+        <color name="dark_onSecondary">#253141</color>
+        <color name="dark_secondaryContainer">#3B4858</color>
+        <color name="dark_onSecondaryContainer">#D7E3F7</color>
+
+        <!-- Cores de Superfície e Fundo -->
+        <color name="dark_background">#191C20</color>
+        <color name="dark_onBackground">#E2E2E6</color>
+        <color name="dark_surface">#191C20</color>
+        <color name="dark_onSurface">#E2E2E6</color>
+        <color name="dark_surfaceVariant">#42474E</color>
+        <color name="dark_onSurfaceVariant">#C3C7CF</color>
+        <color name="dark_outline">#8D9199</color>
+
+        <!-- Cores de Erro -->
+        <color name="dark_error">#FFB4AB</color>
+        <color name="dark_onError">#690005</color>
+        <color name="dark_errorContainer">#93000A</color>
+        <color name="dark_onErrorContainer">#FFDAD6</color>
+    </resources>

@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import devandroid.moacir.meuorcamento.R
-import devandroid.moacir.meuorcamento.data.model.Lancamento
 import devandroid.moacir.meuorcamento.data.model.LancamentoComCategoria
 import devandroid.moacir.meuorcamento.data.model.TipoLancamento
 import devandroid.moacir.meuorcamento.databinding.ItemLancamentoBinding
@@ -45,10 +44,10 @@ class LancamentoAdapter(
             val cor: Int
             if (lancamento.tipo == TipoLancamento.RECEITA) {
                 // Define a cor verde para receitas
-                cor = ContextCompat.getColor(context, R.color.verde_receita)
+                cor = ContextCompat.getColor(context, R.color.app_verde_receita)
             } else {
                 // Define a cor vermelha para despesas
-                cor = ContextCompat.getColor(context, R.color.vermelho_despesa)
+                cor = ContextCompat.getColor(context, R.color.app_vermelho_despesa)
             }
             // Aplica a cor ao TextView do valor
             binding.textViewValor.setTextColor(cor)
